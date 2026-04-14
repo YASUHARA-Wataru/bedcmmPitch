@@ -1,0 +1,30 @@
+# Python バイトコード・キャッシュ
+__pycache__/
+*.py[cod]
+
+# Cython ビルド生成物
+*.c
+*.cpp
+*.so
+*.pyd  # ← Windows用のビルド生成物
+*.dll
+*.exp
+*.lib
+
+# ビルドディレクトリ
+build/
+dist/
+
+# Jupyter Notebook チェックポイント
+.ipynb_checkpoints/
+
+# VScodeのディレクトリ
+.vscode/
+
+# 仮想環境ディレクトリ
+.venv/
+
+# テスト用ファイル
+*.egg-info
+
+# 例外

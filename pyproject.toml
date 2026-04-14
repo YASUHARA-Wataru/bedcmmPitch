@@ -1,0 +1,18 @@
+[project]
+name = "bedcmmPitch"
+version = "1.0.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "WATARU YASUHARA" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+dependencies = [
+    "cython>=3.2.4",
+    "matplotlib>=3.9.4",
+    "numpy>=2.0.2",
+    "pytest>=8.4.2",
+]
