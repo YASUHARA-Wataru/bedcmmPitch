@@ -235,21 +235,15 @@ cpdef np.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_p
             Pitch.append(fs/max_idx)
 
     return np.array(Pitch,dtype=np.float64)
-"""
-cpdef np.ndarray[DTYPE_d_t, ndim=1] calc_bedcmm_core(double[:] data,
-                                                     DTYPE_i_t window_size,
-                                                     DTYPE_i_t hop_size,
-                                                     int[:] search_sample):
+
+cpdef np.ndarray[DTYPE_d_t, ndim=1] calc_bedcmm_core_cy(double[:] data,
+                                                        DTYPE_i_t window_size,
+                                                        DTYPE_i_t hop_size,
+                                                        Py_ssize_t[:] search_sample):
     bedcmm_result_list = []
-    if pp_mode != 'positive+negative':
-        for i in range(window_size, len(data),hop_size):
-            calc_data = data[i-window_size:i]
-            bedcmm_result_list.append(_periodicity(calc_data,search_sample))
-    else:
-        for i in range(window_size, len(data_pos),hop_size):
-            calc_data_posi = data_pos[i-window_size:i]
-            calc_data_nega = data_neg[i-window_size:i]
-            bedcmm_result_list.append(_periodicity(calc_data_posi,search_sample) + _periodicity(calc_data_nega,search_sample))
+    for i in range(window_size, len(data),hop_size):
+        calc_data = data[i-window_size:i]
+        bedcmm_result_list.append(_periodicity_1d_core_cy(calc_data,search_sample))
 
     bedcmm_result = np.array(bedcmm_result_list)
 
@@ -259,19 +253,14 @@ cpdef np.ndarray[DTYPE_d_t, ndim=1] calc_bedcmm_negaposi_core_cy(double[:] data_
                                                                  double[:] data_nega,
                                                                  DTYPE_i_t window_size,
                                                                  DTYPE_i_t hop_size,
-                                                                 int[:] search_sample):
+                                                                 Py_ssize_t[:] search_sample):
     bedcmm_result_list = []
-    if pp_mode != 'positive+negative':
-        for i in range(window_size, len(data_posi),hop_size):
-            calc_data = data[i-window_size:i]
-            bedcmm_result_list.append(_periodicity(calc_data,search_sample))
-    else:
-        for i in range(window_size, len(data_pos),hop_size):
-            calc_data_posi = data_pos[i-window_size:i]
-            calc_data_nega = data_neg[i-window_size:i]
-            bedcmm_result_list.append(_periodicity(calc_data_posi,search_sample) + _periodicity(calc_data_nega,search_sample))
+    for i in range(window_size, len(data_posi),hop_size):
+        calc_data_posi = data_posi[i-window_size:i]
+        calc_data_nega = data_nega[i-window_size:i]
+        bedcmm_result_list.append(_periodicity_1d_core_cy(calc_data_posi,search_sample) + _periodicity_1d_core_cy(calc_data_nega,search_sample))
 
     bedcmm_result = np.array(bedcmm_result_list)
 
     return bedcmm_result
-"""
+

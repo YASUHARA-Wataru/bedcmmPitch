@@ -91,6 +91,11 @@ def main():
                                    interpolator_mode='no')
     plot_pitch(t,times,Pitch,f_start,f_end)
 
+    bedcmm_result = bedcmmPitch.calc_bedcmm(signal)
+    plt.figure()
+    plt.pcolormesh(t[times],np.arange(0,int(window_size/2)/fs,1/fs),bedcmm_result.T, shading="auto")
+    plt.show()
+
     pass
 if __name__ == "__main__":
     main()

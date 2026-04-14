@@ -8,8 +8,7 @@ Copyright (c) 2026, Feel a Piece of the World
 import numpy as np
 from ._config import implementation
 if implementation == 'Cython':
-    #from .cy_impl import calc_Pitch_core_cy,calc_Pitch_negaposi_core_cy,calc_bedcmm_core_cy
-    from .cy_impl import calc_Pitch_core_cy,calc_Pitch_negaposi_core_cy
+    from .cy_impl import calc_Pitch_core_cy,calc_Pitch_negaposi_core_cy,calc_bedcmm_core_cy,calc_bedcmm_negaposi_core_cy
 
 def _periodicity(data,period):
 
@@ -270,23 +269,20 @@ def calc_bedcmm(data,
                                                          search_sample)
         else:
             bedcmm_result = calc_bedcmm_negaposi_core(data,
-                                            window_size,
-                                            hop_size,
-                                            search_sample)
+                                                      window_size,
+                                                      hop_size,
+                                                      search_sample)
     else:
         if implementation == 'Cython':
             bedcmm_result = calc_bedcmm_core_cy(data,
                                                 window_size,
                                                 hop_size,
-                                                search_sample,
-                                                pp_mode,
-                                                pp_threshould)
+                                                search_sample)
         else:
             bedcmm_result = calc_bedcmm_core(data,
-                                            window_size,
-                                            hop_size,
-                                            search_sample,
-                                            pp_mode)
+                                             window_size,
+                                             hop_size,
+                                             search_sample)
     return bedcmm_result
 
 
