@@ -3,7 +3,7 @@
 This is Pitch detection algrorism using periodicity analysis.
 They have two functions, calc_Pitch(calculate Pitch) and calc_bedcmm(periodicity analysis).
 
-## 関数
+## Functions
 - calc_Pitch
     - input(default) : datade description
         - data               : 1D array data(signal data)
