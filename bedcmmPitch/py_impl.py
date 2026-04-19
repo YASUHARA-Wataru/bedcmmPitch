@@ -271,13 +271,13 @@ def calc_Pitch(data,
         raise Exception('pp_mode is only positive,negative,positive+negative,threshould_diff.')
 
     if pitch_range is None:
-        search_sample = np.arange(int(window_size/2))
+        search_sample = np.arange(int(window_size/2), dtype=np.intp)
     else:
         if len(pitch_range) != 2:
             raise Exception('pitch_rage is [start freq(low), end freq(high)].')
         start_range = int(np.floor(1/pitch_range[1]*fs))
         end_range = int(np.ceil(1/pitch_range[0]*fs))
-        search_sample = np.arange(start_range,end_range+1)
+        search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
 
     # 処理実行
     if pp_mode == 'positive+negative':
@@ -354,13 +354,13 @@ def calc_bedcmm(data,
         raise Exception('pp_mode is only positive,negative,positive+negative,threshould_diff.')
 
     if pitch_range is None:
-        search_sample = np.arange(int(window_size/2))
+        search_sample = np.arange(int(window_size/2), dtype=np.intp)
     else:
         if len(pitch_range) != 2:
             raise Exception('pitch_rage is [start freq(low), end freq(high)].')
         start_range = int(np.floor(1/pitch_range[1]*fs))
         end_range = int(np.ceil(1/pitch_range[0]*fs))
-        search_sample = np.arange(start_range,end_range+1)
+        search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
 
     if pp_mode == 'positive+negative':
         if implementation == 'Cython':
