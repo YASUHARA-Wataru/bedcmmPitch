@@ -26,9 +26,9 @@ def main():
     window_size = 2048
     hop_size = 256
     times = np.arange(window_size, len(signal), hop_size)
-
+    """
     # default check
-    #print('default check')
+    print('default check')
     Pitch = bedcmmPitch.calc_Pitch(signal)
     plot_pitch(t,times,Pitch,f_start,f_end)
     # ppmode check
@@ -76,26 +76,61 @@ def main():
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
     plot_pitch(t,times,Pitch,f_start,f_end)
+    """
     # interpolator mode check
     print("interpolator check")
+    print("interpolator gaussian")
     Pitch = bedcmmPitch.calc_Pitch(signal,
                                    pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='dynamic',
-                                   interpolator_mode='parabolic')
+                                   interpolator_mode='gaussian')
     plot_pitch(t,times,Pitch,f_start,f_end)
+    print("interpolator threshould gaussian")
+    Pitch = bedcmmPitch.calc_Pitch(signal,
+                                   pitch_range=[380,500],
+                                   pp_mode='threshould_diff',
+                                   pitch_detect_mode='dynamic',
+                                   interpolator_mode='gaussian')
+    print("interpolator centroid")
+    Pitch = bedcmmPitch.calc_Pitch(signal,
+                                   pitch_range=[380,500],
+                                   pp_mode='positive',
+                                   pitch_detect_mode='dynamic',
+                                   interpolator_mode='centroid')
+    plot_pitch(t,times,Pitch,f_start,f_end)
+    print("interpolator threshould gaussian")
+    Pitch = bedcmmPitch.calc_Pitch(signal,
+                                   pitch_range=[380,500],
+                                   pp_mode='threshould_diff',
+                                   pitch_detect_mode='dynamic',
+                                   interpolator_mode='centroid')
+
+    plot_pitch(t,times,Pitch,f_start,f_end)
+    print("interpolator no")
     Pitch = bedcmmPitch.calc_Pitch(signal,
                                    pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='dynamic',
                                    interpolator_mode='no')
     plot_pitch(t,times,Pitch,f_start,f_end)
+
+    """
     print("bedcmm result check")
     bedcmm_result = bedcmmPitch.calc_bedcmm(signal)
     plt.figure()
     plt.pcolormesh(t[times],np.arange(0,int(window_size/2)/fs,1/fs),bedcmm_result.T, shading="auto")
     plt.show()
 
+    pitch_range = [380,500]
+    bedcmm_result = bedcmmPitch.calc_bedcmm(signal,pitch_range=pitch_range)
+    start_range = int(np.floor(1/pitch_range[1]*fs))
+    end_range = int(np.ceil(1/pitch_range[0]*fs))
+    search_time = np.arange(start_range,end_range+1)/fs
+    plt.figure()
+    plt.pcolormesh(t[times],search_time,bedcmm_result.T, shading="auto")
+    plt.show()
+    """
     pass
 if __name__ == "__main__":
     main()

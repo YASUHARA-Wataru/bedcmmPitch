@@ -51,7 +51,6 @@ def _gaussian_peak(y, i: int, eps: float = 1e-12) -> float:
         return 0.0
     return 0.5 * (ym1 - yp1) / denom
 
-
 def _centroid_peak(y , i: int, half_window: int = 1) -> float:
     """
     重心法。i を中心に [i-half_window, i+half_window] の重心を返す。
@@ -71,49 +70,6 @@ def _centroid_peak(y , i: int, half_window: int = 1) -> float:
 
     x_bar = float(np.sum(idx * w) / s)
     return x_bar - float(i)
-
-
-def _sinc_interp_1d(y, x: float, radius: int = 16) -> float:
-    """
-    1次元 sinc 補間:
-        y(x) ≈ sum_n y[n] * sinc(x-n)
-    ここでは有限長窓で近似。
-    """
-    y = np.asarray(y, dtype=np.float64)
-    n0 = int(math.floor(x))
-    lo = max(0, n0 - radius)
-    hi = min(len(y) - 1, n0 + radius)
-
-    n = np.arange(lo, hi + 1, dtype=np.float64)
-    return float(np.sum(y[lo : hi + 1] * np.sinc(x - n)))
-
-
-def _sinc_peak_refine(
-    y,
-    i: int,
-    search_radius: float = 1.0,
-    grid: int = 257,
-    sinc_radius: int = 16,
-) -> float:
-    """
-    sinc 再構成した連続波形を、ピーク周辺で微細探索する。
-    返り値は相対オフセット(delta)。
-    """
-    y = np.asarray(y, dtype=np.float64)
-    if i <= 0 or i >= len(y) - 1:
-        return 0.0
-
-    xs = np.linspace(i - search_radius, i + search_radius, grid)
-    vals = np.array([_sinc_interp_1d(y, float(x), radius=sinc_radius) for x in xs])
-    x_best = float(xs[int(np.argmax(vals))])
-
-    # 2段階目の軽い再探索
-    xs2 = np.linspace(x_best - search_radius / grid * 8.0, x_best + search_radius / grid * 8.0, grid)
-    vals2 = np.array([_sinc_interp_1d(y, float(x), radius=sinc_radius) for x in xs2])
-    x_best2 = float(xs2[int(np.argmax(vals2))])
-
-    return x_best2 - float(i)
-
 
 def _periodicity(data,period):
 
@@ -180,19 +136,21 @@ def calc_Pitch_core(data,
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
+        else:
+            raise Exception('pitch_detect_mode is dynamic,static,maximum.')
 
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
                 if interpolator_mode == 'parabolic':
                     peak_idx = search_sample[max_idx_int]+_parabolic_peak(bedcmm_result,max_idx_int)
-                elif interpolator_mode == 'centroid':
-                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     peak_idx = search_sample[max_idx_int]+_gaussian_peak(bedcmm_result,max_idx_int)
-                elif interpolator_mode == 'sinc':
-                    peak_idx = search_sample[max_idx_int]+_sinc_peak_refine(bedcmm_result,max_idx_int)
+                elif interpolator_mode == 'centroid':
+                    if pp_mode == 'threshould_diff':
+                        bedcmm_result = bedcmm_result - min(bedcmm_result)
+                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
                 elif interpolator_mode == 'no':
                     peak_idx = float(search_sample[max_idx_int])
                 else:
@@ -244,19 +202,21 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
+        else:
+            raise Exception('pitch_detect_mode is dynamic,static,maximum.')
 
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
                 if interpolator_mode == 'parabolic':
                     peak_idx = search_sample[max_idx_int]+_parabolic_peak(bedcmm_result,max_idx_int)
-                elif interpolator_mode == 'centroid':
-                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     peak_idx = search_sample[max_idx_int]+_gaussian_peak(bedcmm_result,max_idx_int)
-                elif interpolator_mode == 'sinc':
-                    peak_idx = search_sample[max_idx_int]+_sinc_peak_refine(bedcmm_result,max_idx_int)
+                elif interpolator_mode == 'centroid':
+                    if pp_mode == 'threshould_diff':
+                        bedcmm_result = bedcmm_result - min(bedcmm_result)
+                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
                 elif interpolator_mode == 'no':
                     peak_idx = float(search_sample[max_idx_int])
                 else:
