@@ -1,6 +1,6 @@
 # bedcmmPitch
 ## Algorism of Pitch detection
-This is Pitch detection algrorism using periodicity analysis.
+This is Pitch detection algrorism using periodicity analysis for Research and PoC.
 They have two functions, calc_Pitch(calculate Pitch) and calc_bedcmm(periodicity analysis).
 
 ## Functions

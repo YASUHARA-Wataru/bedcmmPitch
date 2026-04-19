@@ -18,7 +18,7 @@ def main():
     fs = 44100  # サンプリングレート
     duration = 0.2  # 秒
     change_time = 0.1
-    amp = 1
+    amp = 10
     t = np.linspace(0, duration, int(fs * duration), endpoint=False)
     f_start, f_end = 440.0, 466.16
     signal = np.where(t < change_time, amp*np.sin(2 * np.pi * f_start * t), amp*np.sin(2 * np.pi * f_end * t))
@@ -28,13 +28,13 @@ def main():
     times = np.arange(window_size, len(signal), hop_size)
 
     # default check
-    print('default check')
+    #print('default check')
     Pitch = bedcmmPitch.calc_Pitch(signal)
     plot_pitch(t,times,Pitch,f_start,f_end)
     # ppmode check
     print("ppmode check posinega")
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive+negative',
                                    pitch_detect_mode='dynamic',
                                    interpolator_mode='parabolic')
@@ -53,7 +53,7 @@ def main():
     # pitch_range check
     print("pitch range check")
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
@@ -64,14 +64,14 @@ def main():
     # detect mode check
     print("detect mode check")
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='static',
                                    pitch_detect_thre=0.05,
                                    interpolator_mode='parabolic')
     plot_pitch(t,times,Pitch,f_start,f_end)
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
@@ -79,18 +79,18 @@ def main():
     # interpolator mode check
     print("interpolator check")
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='dynamic',
                                    interpolator_mode='parabolic')
     plot_pitch(t,times,Pitch,f_start,f_end)
     Pitch = bedcmmPitch.calc_Pitch(signal,
-                                   pitch_range=[400,500],
+                                   pitch_range=[380,500],
                                    pp_mode='positive',
                                    pitch_detect_mode='dynamic',
                                    interpolator_mode='no')
     plot_pitch(t,times,Pitch,f_start,f_end)
-
+    print("bedcmm result check")
     bedcmm_result = bedcmmPitch.calc_bedcmm(signal)
     plt.figure()
     plt.pcolormesh(t[times],np.arange(0,int(window_size/2)/fs,1/fs),bedcmm_result.T, shading="auto")
