@@ -271,7 +271,8 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result_posi = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result_nega = np.zeros(len(search_sample))
-    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data = np.zeros(window_size)
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data_posi = np.zeros(window_size)
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data_nega = np.zeros(window_size)
 
     for i in range(window_size, len(data_posi),hop_size):
         calc_data_posi = np.asarray(data_posi[i-window_size:i])
