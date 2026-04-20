@@ -240,13 +240,14 @@ def calc_Pitch(data,
                window_size=2048,
                hop_size=256,
                pitch_range=None,
-               pp_mode='positive',
+               pp_mode='positive+negative',
                pp_threshould=0,
                bedcmm_smooth=3,
                pitch_detect_mode='dynamic',
                pitch_detect_thre=0.4,
                interpolator_mode='parabolic'):
     
+    data = data.copy()
     data = np.ascontiguousarray(data, dtype=np.float64)
 
     if data.ndim != 1:
@@ -332,9 +333,10 @@ def calc_bedcmm(data,
                 window_size=2048,
                 hop_size=256,
                 pitch_range=None,
-                pp_mode='positive',
+                pp_mode='positive+negative',
                 pp_threshould=0):
 
+    data = data.copy()
     # データ前処理
     if pp_mode == 'positive':
         data[data < 0] = 0

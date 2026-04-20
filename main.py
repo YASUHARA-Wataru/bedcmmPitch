@@ -36,16 +36,27 @@ def main():
                                    hop_size=hop_size)
     plot_pitch(t,times,Pitch,f_start,f_end)
     # ppmode check
-    print("ppmode check posinega")
+    print("ppmode check posi")
     Pitch = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
-                                   pp_mode='positive+negative',
+                                   pp_mode='positive',
                                    pitch_detect_mode='dynamic',
                                    interpolator_mode='parabolic')
 
     plot_pitch(t,times,Pitch,f_start,f_end)
+
+    print("ppmode check nega")
+    Pitch = bedcmmPitch.calc_Pitch(signal,
+                                   window_size=window_size,
+                                   hop_size=hop_size,
+                                   pitch_range=pitch_range,
+                                   pp_mode='negative',
+                                   pitch_detect_mode='dynamic',
+                                   interpolator_mode='parabolic')
+    plot_pitch(t,times,Pitch,f_start,f_end)
+
 
     print("ppmode check thrediff")
     Pitch = bedcmmPitch.calc_Pitch(signal,

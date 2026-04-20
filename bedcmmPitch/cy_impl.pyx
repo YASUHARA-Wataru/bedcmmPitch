@@ -341,9 +341,12 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_bedcmm_core_cy(double[:] data,
                                                         DTYPE_i_t window_size,
                                                         DTYPE_i_t hop_size,
                                                         Py_ssize_t[:] search_sample):
+
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data = np.zeros(window_size)
+
     bedcmm_result_list = []
     for i in range(window_size, len(data),hop_size):
-        calc_data = data[i-window_size:i]
+        calc_data = np.asarray(data[i-window_size:i])
         bedcmm_result_list.append(_periodicity_1d_core_cy(calc_data,search_sample))
 
     bedcmm_result = np.array(bedcmm_result_list)
@@ -356,9 +359,12 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_bedcmm_negaposi_core_cy(double[:] data
                                                                  DTYPE_i_t hop_size,
                                                                  Py_ssize_t[:] search_sample):
     bedcmm_result_list = []
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data_posi = np.zeros(window_size)
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data_nega = np.zeros(window_size)
+
     for i in range(window_size, len(data_posi),hop_size):
-        calc_data_posi = data_posi[i-window_size:i]
-        calc_data_nega = data_nega[i-window_size:i]
+        calc_data_posi = np.asarray(data_posi[i-window_size:i])
+        calc_data_nega = np.asarray(data_nega[i-window_size:i])
         bedcmm_result_list.append(_periodicity_1d_core_cy(calc_data_posi,search_sample) + _periodicity_1d_core_cy(calc_data_nega,search_sample))
 
     bedcmm_result = np.array(bedcmm_result_list)
