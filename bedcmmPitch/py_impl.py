@@ -244,7 +244,7 @@ def calc_Pitch(data,
                pp_threshould=0,
                bedcmm_smooth=3,
                pitch_detect_mode='dynamic',
-               pitch_detect_thre=0.75,
+               pitch_detect_thre=0.6,
                interpolator_mode='parabolic'):
     
     data = data.copy()
