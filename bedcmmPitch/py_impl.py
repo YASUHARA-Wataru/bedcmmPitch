@@ -11,8 +11,6 @@ from ._config import implementation
 if implementation == 'Cython':
     from .cy_impl import calc_Pitch_core_cy,calc_Pitch_negaposi_core_cy,calc_bedcmm_core_cy,calc_bedcmm_negaposi_core_cy
 
-import matplotlib.pyplot as plt
-
 EPS = 1e-300
 
 def _parabolic_peak(y, i: int) -> float:
@@ -246,7 +244,7 @@ def calc_Pitch(data,
                pp_threshould=0,
                bedcmm_smooth=3,
                pitch_detect_mode='dynamic',
-               pitch_detect_thre=0.33333,
+               pitch_detect_thre=0.4,
                interpolator_mode='parabolic'):
     
     data = np.ascontiguousarray(data, dtype=np.float64)
@@ -274,7 +272,7 @@ def calc_Pitch(data,
         search_sample = np.arange(int(window_size/2), dtype=np.intp)
     else:
         if len(pitch_range) != 2:
-            raise Exception('pitch_rage is [start freq(low), end freq(high)].')
+            raise Exception('pitch_rage is [min freq(low), max freq(high)].')
         start_range = int(np.floor(1/pitch_range[1]*fs))
         end_range = int(np.ceil(1/pitch_range[0]*fs))
         search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
@@ -364,12 +362,14 @@ def calc_bedcmm(data,
 
     if pp_mode == 'positive+negative':
         if implementation == 'Cython':
-            bedcmm_result = calc_bedcmm_negaposi_core_cy(data,
+            bedcmm_result = calc_bedcmm_negaposi_core_cy(data_pos,
+                                                         data_neg,
                                                          window_size,
                                                          hop_size,
                                                          search_sample)
         else:
-            bedcmm_result = calc_bedcmm_negaposi_core(data,
+            bedcmm_result = calc_bedcmm_negaposi_core(data_pos,
+                                                      data_neg,
                                                       window_size,
                                                       hop_size,
                                                       search_sample)
