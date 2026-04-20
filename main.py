@@ -13,6 +13,7 @@ def plot_pitch(t,times,Pitch,f_start,f_end):
     pass
 
 def main():
+    #TODO:bedcmm scoreの導入
     print("Hello from bedcmmPitch!")
 
     fs = 44100  # サンプリングレート
