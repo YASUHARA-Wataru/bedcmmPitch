@@ -292,7 +292,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'dynamic':
-            threshould = _mean(calc_data)*pitch_detect_thre
+            threshould = (_mean(calc_data_posi)+_mean(calc_data_nega))*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould,search_sample,bedcmm_smooth,interpolator_mode)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre,search_sample,bedcmm_smooth,interpolator_mode)
