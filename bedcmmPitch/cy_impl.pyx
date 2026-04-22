@@ -265,7 +265,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
     cdef list Pitch = []
     cdef int i,j
     cdef double smooth_temp
-    cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(window_size-bedcmm_smooth+1)
+    cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
     cdef double threshould,delta_x,ip_x
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
