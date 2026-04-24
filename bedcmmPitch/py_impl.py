@@ -147,19 +147,19 @@ def calc_Pitch_core(data,
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'signal-dynamic':
+        if pitch_detect_mode == 'score':
             threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
-        elif pitch_detect_mode == 'peak-dynamic':
+        elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
             threshould = peak_value*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         else:
-            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
+            raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
@@ -225,19 +225,19 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'dynamic':
+        if pitch_detect_mode == 'score':
             threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
-        elif pitch_detect_mode == 'peak-dynamic':
+        elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
             threshould = peak_value*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         else:
-            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
+            raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
@@ -286,7 +286,7 @@ def calc_Pitch(data,
                pp_mode='positive+negative',
                pp_threshould=0,
                bedcmm_smooth=3,
-               pitch_detect_mode='peak-dynamic',
+               pitch_detect_mode='peak',
                pitch_detect_thre=0.85,
                interpolator_mode='parabolic'):
     

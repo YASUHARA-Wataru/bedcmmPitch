@@ -29,7 +29,7 @@ def main():
     window_size = 2048
     hop_size = 256
     times = np.arange(window_size, len(signal), hop_size)
-    """
+
     # default check
     print('default check')
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
@@ -44,7 +44,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='parabolic')
 
     print(score)
@@ -56,7 +56,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='negative',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='parabolic')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
@@ -108,6 +108,15 @@ def main():
                                    interpolator_mode='parabolic')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
+    Pitch,score = bedcmmPitch.calc_Pitch(signal,
+                                   window_size=window_size,
+                                   hop_size=hop_size,
+                                   pitch_range=pitch_range,
+                                   pp_mode='positive',
+                                   pitch_detect_mode='score',
+                                   interpolator_mode='parabolic')
+    print(score)
+    plot_pitch(t,times,Pitch,f_start,f_end)
 
     # interpolator mode check
     print("interpolator check")
@@ -117,7 +126,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='gaussian')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
@@ -127,7 +136,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='threshould_diff',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='gaussian')
     print(score)
     print("interpolator centroid")
@@ -136,7 +145,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='centroid')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
@@ -146,7 +155,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='threshould_diff',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='centroid')
 
     print(score)
@@ -157,11 +166,11 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='peak-dynamic',
+                                   pitch_detect_mode='peak',
                                    interpolator_mode='no')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
-    """
+
     print("bedcmm result check")
     bedcmm_result,mean_data = bedcmmPitch.calc_bedcmm(signal,
                                             window_size=window_size,

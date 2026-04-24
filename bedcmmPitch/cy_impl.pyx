@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # cython: boundscheck=False, wraparound=False, cdivision=True
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
+# cython: language_level=3
 """
 bedcmmPitch class(Cython)
 
@@ -263,19 +264,19 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'singal-dynamic':
+        if pitch_detect_mode == 'score':
             threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
-        elif pitch_detect_mode == 'peak-dynamic':
+        elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
             threshould = peak_value*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         else:
-            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
+            raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
@@ -357,19 +358,19 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'signal-dynamic':
+        if pitch_detect_mode == 'score':
             threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
-        elif pitch_detect_mode == 'peak-dynamic':
+        elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
             threshould = peak_value*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         else:
-            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
+            raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
