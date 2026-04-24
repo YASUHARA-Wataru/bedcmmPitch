@@ -15,36 +15,45 @@ ctypedef cnp.float64_t DTYPE_d_t
 ctypedef cnp.int32_t DTYPE_i_t
 
 # Cレベルの関数を利用するために math をインポート
-from libc.math cimport fmin,log,INFINITY,fabs
+from libc.math cimport fmin,log,INFINITY,fabs,exp
 
 cdef double EPS = 1e-300
 
-cdef double _parabolic_peak(double[:] y, Py_ssize_t i):
-    cdef double ym1, y0, yp1, denom
+cdef (double,double)_parabolic_peak(double[:] y, Py_ssize_t i):
+    cdef double ym1, y0, yp1, denom,delta,y_peak
     if i <= 0 or i >= y.shape[0] - 1:
-        return 0.0
+        return 0.0,0.0
     ym1 = y[i - 1]
     y0 = y[i]
     yp1 = y[i + 1]
     denom = ym1 - 2.0 * y0 + yp1
+
     if fabs(denom) < EPS:
-        return 0.0
-    return 0.5 * (ym1 - yp1) / denom
+        return 0.0,y0
+
+    delta = 0.5 * (ym1 - yp1) / denom
+    y_peak = y0 - 0.25 * (ym1 - yp1) * delta    
+ 
+    return delta,y_peak
 
 
-cdef double _gaussian_peak(double[:] y, Py_ssize_t i):
-    cdef double ym1, y0, yp1, denom
+cdef (double,double) _gaussian_peak(double[:] y, Py_ssize_t i):
+    cdef double ym1, y0, yp1, denom, delta
+
     if i <= 0 or i >= y.shape[0] - 1:
-        return 0.0
+        return 0.0,0.0
+
     ym1 = log(max(y[i - 1], EPS))
     y0 = log(max(y[i], EPS))
     yp1 = log(max(y[i + 1], EPS))
     denom = ym1 - 2.0 * y0 + yp1
     if fabs(denom) < 1e-300:
-        return 0.0
-    return 0.5 * (ym1 - yp1) / denom
+        return 0.0,exp(y0)
+    delta = 0.5 * (ym1 - yp1) / denom 
 
-cdef double _centroid_peak(double[:] y, Py_ssize_t i, int half_window=1):
+    return delta ,exp(y0 - 0.25 * (ym1 - yp1) * delta)
+
+cdef (double,double) _centroid_peak(double[:] y, Py_ssize_t i, int half_window=1):
     cdef Py_ssize_t lo, hi, n, j
     cdef double s = 0.0
     cdef double sw = 0.0
@@ -65,10 +74,10 @@ cdef double _centroid_peak(double[:] y, Py_ssize_t i, int half_window=1):
             sw += (<double>j) * w
 
     if s <= 0.0:
-        return 0.0
+        return 0.0,0.0
 
     x = sw / s
-    return x - (<double>i)
+    return x - (<double>i),y[i]
 
 
 cdef cnp.ndarray[DTYPE_d_t, ndim=1] _periodicity_1d_core_cy(double[:] data, Py_ssize_t[:] periods):
@@ -152,20 +161,38 @@ cdef Py_ssize_t _peak_detect_threshould_cy(double[:] bedcmm_result,
     return first_peak_idx
 
 cdef Py_ssize_t _peak_detect_maximum_cy(double[:] bedcmm_result):
-                                       
-    cdef Py_ssize_t max_peak_idx,i
-    cdef double max_temp
-    cdef double peak_ym1,peak_yp1,delta_x,ip_x
 
-    # 最大値のインデックスの取得
-    max_temp = -INFINITY
-    max_peak_idx = -1
-    for i in range(len(bedcmm_result)):
-        if bedcmm_result[i] > max_temp:
-            max_temp = bedcmm_result[i]
-            max_peak_idx = i
+    cdef list peaks
+    cdef double max_value
+    cdef Py_ssize_t max_index
+    # ピークの取得
+    cdef int prev_sign = 0
+    cdef int sign = 0
+    cdef Py_ssize_t i
 
-    return max_peak_idx
+    peaks = []
+    for i in range(1,len(bedcmm_result)):
+        if (bedcmm_result[i] - bedcmm_result[i-1]) > 0:
+            sign = 1
+        else:
+            sign = -1
+        
+        if (prev_sign == 1) and (sign == -1) and (bedcmm_result[i]):
+            peaks.append(i - 1)
+
+        prev_sign = sign
+
+    if len(peaks) == 0:
+        max_index = np.nan
+    else:
+        # 最大値の取得
+        max_value = -INFINITY
+        for i in peaks:
+            if max_value < bedcmm_result[i]:
+                max_value = bedcmm_result[i]
+                max_index = i
+
+    return max_index
 
 cdef _calc_peak_max_value(double[:] bedcmm_result):
 
@@ -213,7 +240,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x,min,peak_value
+    cdef double threshould,delta_x,ip_x,min,peak_value,mean_data,score
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data = np.zeros(window_size)
@@ -221,6 +248,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
     for i in range(window_size, len(data),hop_size):
         calc_data = np.asarray(data[i-window_size:i])
         bedcmm_result = _periodicity_1d_core_cy(calc_data,search_sample)
+        mean_data = _mean(calc_data)
 
         if bedcmm_smooth > 1:
             for j in range(len(search_sample)-bedcmm_smooth+1):
@@ -236,7 +264,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'singal-dynamic':
-            threshould = _mean(calc_data)*pitch_detect_thre
+            threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
@@ -251,7 +279,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
-                delta_x = _parabolic_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'gaussian':
 
                 if pp_mode == 'threshould_diff':
@@ -259,7 +287,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
 
-                delta_x = _gaussian_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'centroid':
             
                 if pp_mode == 'threshould_diff':
@@ -267,21 +295,23 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
 
-                delta_x = _centroid_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'no':
+                peak_value = bedcmm_result[max_idx_int]
                 delta_x = 0.0
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
 
             ip_x = <double> search_sample[max_idx_int] + delta_x + ((bedcmm_smooth-1)/2)
-
+            score = peak_value/mean_data
         else:
             ip_x = np.nan
+            score = np.nan
 
         if np.isnan(ip_x):
-            Pitch.append(np.nan)
+            Pitch.append([np.nan,np.nan])
         else:
-            Pitch.append(fs/ip_x)
+            Pitch.append([fs/ip_x,score])
 
     return np.array(Pitch,dtype=np.float64)
 
@@ -300,7 +330,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x,peak_value
+    cdef double threshould,delta_x,ip_x,peak_value,mean_data,score
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result_posi = np.zeros(len(search_sample))
@@ -311,6 +341,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
     for i in range(window_size, len(data_posi),hop_size):
         calc_data_posi = np.asarray(data_posi[i-window_size:i])
         calc_data_nega = np.asarray(data_nega[i-window_size:i])
+        mean_data = _mean(calc_data_posi)+_mean(calc_data_nega)
         bedcmm_result = _periodicity_1d_core_cy(calc_data_posi,search_sample) + _periodicity_1d_core_cy(calc_data_nega,search_sample)
 
         if bedcmm_smooth > 1:
@@ -327,7 +358,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'signal-dynamic':
-            threshould = (_mean(calc_data_posi)+_mean(calc_data_nega))*pitch_detect_thre
+            threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
@@ -342,7 +373,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
-                delta_x = _parabolic_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
 
             elif interpolator_mode == 'gaussian':
             
@@ -351,7 +382,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
 
-                delta_x = _gaussian_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'centroid':
             
                 if pp_mode == 'threshould_diff':
@@ -359,21 +390,23 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
 
-                delta_x = _centroid_peak(bedcmm_result,max_idx_int)
+                delta_x,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'no':
+                peak_value = bedcmm_result[max_idx_int]
                 delta_x = 0.0
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
 
             ip_x = <double> search_sample[max_idx_int] + delta_x + ((bedcmm_smooth-1)/2)
-
+            score = peak_value/mean_data
         else:
             ip_x = np.nan
+            score = np.nan
 
         if np.isnan(ip_x):
-            Pitch.append(np.nan)
+            Pitch.append([np.nan,np.nan])
         else:
-            Pitch.append(fs/ip_x)
+            Pitch.append([fs/ip_x,score])
 
     return np.array(Pitch,dtype=np.float64)
 

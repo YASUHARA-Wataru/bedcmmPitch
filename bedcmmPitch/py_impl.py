@@ -26,9 +26,14 @@ def _parabolic_peak(y, i: int) -> float:
     y0 = y[i]
     yp1 = y[i + 1]
     denom = ym1 - 2.0 * y0 + yp1
+
     if abs(denom) < EPS:
-        return 0.0
-    return 0.5 * (ym1 - yp1) / denom
+        return 0.0,y0
+
+    delta = 0.5 * (ym1 - yp1) / denom
+    y_peak = y0 - 0.25 * (ym1 - yp1) * delta    
+    
+    return  delta, y_peak 
 
 
 def _gaussian_peak(y, i: int, eps: float = 1e-12) -> float:
@@ -44,15 +49,22 @@ def _gaussian_peak(y, i: int, eps: float = 1e-12) -> float:
     y0 = math.log(max(float(y[i]), eps))
     yp1 = math.log(max(float(y[i + 1]), eps))
 
-    denom = ym1 - 2.0 * y0 + yp1
-    if abs(denom) < EPS:
-        return 0.0
-    return 0.5 * (ym1 - yp1) / denom
+    denom = (ym1 - 2*y0 + yp1)
+    if abs(denom) < 1e-12:
+        return 0.0, y0
+
+    delta = 0.5 * (ym1 - yp1) / denom
+    l_peak = y0 - 0.25 * (ym1 - yp1) * delta
+
+    y_peak = math.exp(l_peak)
+
+    return delta, y_peak
 
 def _centroid_peak(y , i: int, half_window: int = 1) -> float:
     """
     重心法。i を中心に [i-half_window, i+half_window] の重心を返す。
     y は非負値を想定。
+    最大値は、iの値をそのまま採用する事とする。
     """
     y = np.asarray(y, dtype=np.float64)
     n = len(y)
@@ -67,7 +79,8 @@ def _centroid_peak(y , i: int, half_window: int = 1) -> float:
         return 0.0
 
     x_bar = float(np.sum(idx * w) / s)
-    return x_bar - float(i)
+
+    return x_bar - float(i),y[i]
 
 def _periodicity(data,period):
 
@@ -124,6 +137,7 @@ def calc_Pitch_core(data,
     for i in range(window_size, len(data),hop_size):
         calc_data = data[i-window_size:i]
         bedcmm_result = _periodicity(calc_data,search_sample)
+        mean_data = np.mean(calc_data)
 
         if bedcmm_smooth > 1:
             filt = np.ones(bedcmm_smooth)/bedcmm_smooth
@@ -134,7 +148,7 @@ def calc_Pitch_core(data,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'signal-dynamic':
-            threshould = np.mean(calc_data)*pitch_detect_thre
+            threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
@@ -150,29 +164,36 @@ def calc_Pitch_core(data,
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
                 if interpolator_mode == 'parabolic':
-                    peak_idx = search_sample[max_idx_int]+_parabolic_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
-                    peak_idx = search_sample[max_idx_int]+_gaussian_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
-                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
+                    peak_value = bedcmm_result[max_idx_int]
                     peak_idx = float(search_sample[max_idx_int])
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
                 peak_idx = peak_idx + ((bedcmm_smooth-1)/2)
+                peak_score = peak_value/mean_data
             else:
                 peak_idx = np.nan
+                peak_score = np.nan
         else:
             peak_idx = np.nan
+            peak_score =np.nan
 
         if np.isnan(peak_idx):
-            Pitch.append(np.nan)
+            Pitch.append([np.nan,np.nan])
         else:
-            Pitch.append(fs/peak_idx)
+            Pitch.append([fs/peak_idx,peak_score])
 
     Pitch = np.array(Pitch)
 
@@ -194,6 +215,7 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
         calc_data_posi = data_posi[i-window_size:i]
         calc_data_nega = data_nega[i-window_size:i]
         bedcmm_result = _periodicity(calc_data_posi,search_sample) + _periodicity(calc_data_nega,search_sample)
+        mean_data = np.mean(calc_data_posi)+np.mean(calc_data_nega)
 
         if bedcmm_smooth > 1:
             filt = np.ones(bedcmm_smooth)/bedcmm_smooth
@@ -204,14 +226,14 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'dynamic':
-            threshould = (np.mean(calc_data_posi) + np.mean(calc_data_nega))*pitch_detect_thre
+            threshould = mean_data*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
             max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
         elif pitch_detect_mode == 'peak-dynamic':
-            peak_value = _calc_peak_value(bedcmm_result)
+            peak_value = _calc_peak_max_value(bedcmm_result)
             threshould = peak_value*pitch_detect_thre
             max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
         else:
@@ -220,29 +242,36 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
         if ~np.isnan(max_idx_int):
             if max_idx_int != search_sample[0]:
                 if interpolator_mode == 'parabolic':
-                    peak_idx = search_sample[max_idx_int]+_parabolic_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
-                    peak_idx = search_sample[max_idx_int]+_gaussian_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshould_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
-                    peak_idx = search_sample[max_idx_int]+_centroid_peak(bedcmm_result,max_idx_int)
+                    delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
+                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
+                    peak_value = bedcmm_result[max_idx_int]
                     peak_idx = float(search_sample[max_idx_int])
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
                 peak_idx = peak_idx + ((bedcmm_smooth-1)/2)
+                peak_score = peak_value/mean_data
             else:
                 peak_idx = np.nan
+                peak_score =np.nan
         else:
             peak_idx = np.nan
+            peak_score = np.nan
 
         if np.isnan(peak_idx):
-            Pitch.append(np.nan)
+            Pitch.append([np.nan,np.nan])
         else:
-            Pitch.append(fs/peak_idx)
+            Pitch.append([fs/peak_idx,peak_score])
 
     Pitch = np.array(Pitch)
 
@@ -258,7 +287,7 @@ def calc_Pitch(data,
                pp_threshould=0,
                bedcmm_smooth=3,
                pitch_detect_mode='peak-dynamic',
-               pitch_detect_thre=0.6,
+               pitch_detect_thre=0.85,
                interpolator_mode='parabolic'):
     
     data = data.copy()
@@ -340,7 +369,10 @@ def calc_Pitch(data,
                                     pitch_detect_thre,
                                     interpolator_mode)
 
-    return Pitch
+    Pitch_data = Pitch[:,0]
+    Pitch_score = Pitch[:,1]
+
+    return Pitch_data,Pitch_score
 
 def calc_bedcmm(data,
                 fs=44100,
