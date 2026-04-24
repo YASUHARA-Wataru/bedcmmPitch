@@ -43,7 +43,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='parabolic')
 
     plot_pitch(t,times,Pitch,f_start,f_end)
@@ -54,7 +54,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='negative',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='parabolic')
     plot_pitch(t,times,Pitch,f_start,f_end)
 
@@ -111,7 +111,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='gaussian')
     plot_pitch(t,times,Pitch,f_start,f_end)
     print("interpolator threshould gaussian")
@@ -120,7 +120,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='threshould_diff',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='gaussian')
     print("interpolator centroid")
     Pitch = bedcmmPitch.calc_Pitch(signal,
@@ -128,7 +128,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='centroid')
     plot_pitch(t,times,Pitch,f_start,f_end)
     print("interpolator threshould gaussian")
@@ -137,7 +137,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='threshould_diff',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='centroid')
 
     plot_pitch(t,times,Pitch,f_start,f_end)
@@ -147,7 +147,7 @@ def main():
                                    hop_size=hop_size,
                                    pitch_range=pitch_range,
                                    pp_mode='positive',
-                                   pitch_detect_mode='dynamic',
+                                   pitch_detect_mode='peak-dynamic',
                                    interpolator_mode='no')
     plot_pitch(t,times,Pitch,f_start,f_end)
 

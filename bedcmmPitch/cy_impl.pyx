@@ -105,6 +105,7 @@ cdef cnp.ndarray[DTYPE_d_t, ndim=1] _periodicity_1d_core_cy(double[:] data, Py_s
 
 cdef double _mean(double[:] data):
     cdef double mean,sum
+    cdef Py_ssize_t i
 
     sum = 0
     for i in range(len(data)):
@@ -115,6 +116,7 @@ cdef double _mean(double[:] data):
 
 cdef double _min(double[:] data):
     cdef double mean,sum
+    cdef Py_ssize_t i
 
     min = INFINITY
     for i in range(len(data)):
@@ -125,12 +127,10 @@ cdef double _min(double[:] data):
 
 
 cdef Py_ssize_t _peak_detect_threshould_cy(double[:] bedcmm_result,
-                                           DTYPE_d_t threshould,
-                                           Py_ssize_t[:] search_sample,
-                                           DTYPE_i_t bedcmm_smooth,
-                                           str interpolator_mode):
+                                           DTYPE_d_t threshould):
 
-    cdef int first_peak_idx,i,prev_sign,sign
+    cdef Py_ssize_t first_peak_idx,i
+    cdef int prev_sign,sign
     cdef double peak_ym1,peak_yp1,delta_x,ip_x
 
     # 最初のピークの取得
@@ -151,12 +151,9 @@ cdef Py_ssize_t _peak_detect_threshould_cy(double[:] bedcmm_result,
 
     return first_peak_idx
 
-cdef Py_ssize_t _peak_detect_maximum_cy(double[:] bedcmm_result,
-                                        Py_ssize_t[:] search_sample,
-                                        DTYPE_i_t bedcmm_smooth,
-                                        str interpolator_mode):
+cdef Py_ssize_t _peak_detect_maximum_cy(double[:] bedcmm_result):
                                        
-    cdef int max_peak_idx,i
+    cdef Py_ssize_t max_peak_idx,i
     cdef double max_temp
     cdef double peak_ym1,peak_yp1,delta_x,ip_x
 
@@ -170,6 +167,37 @@ cdef Py_ssize_t _peak_detect_maximum_cy(double[:] bedcmm_result,
 
     return max_peak_idx
 
+cdef _calc_peak_max_value(double[:] bedcmm_result):
+
+    cdef list peaks
+    cdef double max_value
+    # ピークの取得
+    cdef int prev_sign = 0
+    cdef int sign = 0
+    cdef Py_ssize_t i
+
+    peaks = []
+    for i in range(1,len(bedcmm_result)):
+        if (bedcmm_result[i] - bedcmm_result[i-1]) > 0:
+            sign = 1
+        else:
+            sign = -1
+        
+        if (prev_sign == 1) and (sign == -1) and (bedcmm_result[i]):
+            peaks.append(i - 1)
+
+        prev_sign = sign
+
+    if len(peaks) == 0:
+        max_value = np.nan
+    else:
+        # 最大値の取得
+        max_value = -INFINITY
+        for i in peaks:
+            if max_value < bedcmm_result[i]:
+                max_value = bedcmm_result[i]
+
+    return max_value
 
 cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
                                                        DTYPE_d_t fs,
@@ -185,7 +213,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x,min
+    cdef double threshould,delta_x,ip_x,min,peak_value
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data = np.zeros(window_size)
@@ -207,13 +235,19 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_core_cy(double[:] data,
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'dynamic':
+        if pitch_detect_mode == 'singal-dynamic':
             threshould = _mean(calc_data)*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
-            max_idx_int = _peak_detect_maximum_cy(bedcmm_result,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
+        elif pitch_detect_mode == 'peak-dynamic':
+            peak_value = _calc_peak_max_value(bedcmm_result)
+            threshould = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+        else:
+            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
@@ -266,7 +300,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x
+    cdef double threshould,delta_x,ip_x,peak_value
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result_posi = np.zeros(len(search_sample))
@@ -292,13 +326,19 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_Pitch_negaposi_core_cy(double[:] data_
         else:
             raise Exception('bedcmm_smooth > 0 and int')
         
-        if pitch_detect_mode == 'dynamic':
+        if pitch_detect_mode == 'signal-dynamic':
             threshould = (_mean(calc_data_posi)+_mean(calc_data_nega))*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
-            max_idx_int = _peak_detect_maximum_cy(bedcmm_result,search_sample,bedcmm_smooth,interpolator_mode)
+            max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
+        elif pitch_detect_mode == 'peak-dynamic':
+            peak_value = _calc_peak_max_value(bedcmm_result)
+            threshould = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+        else:
+            raise Exception('pitch_detect_mode is signal-dynamic,static,maximum,peak-dynamic.')
 
         if max_idx_int != 0:
             if interpolator_mode == 'parabolic':
