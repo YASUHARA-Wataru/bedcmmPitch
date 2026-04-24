@@ -180,7 +180,7 @@ def calc_Pitch_core(data,
                     peak_value = bedcmm_result[max_idx_int]
                     peak_idx = float(search_sample[max_idx_int])
                 else:
-                    raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+                    raise Exception('interpolator_mode is parabolic,centroid,gaussian or no')
                 peak_idx = peak_idx + ((bedcmm_smooth-1)/2)
                 peak_score = peak_value/mean_data
             else:

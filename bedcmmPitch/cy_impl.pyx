@@ -301,7 +301,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
                 peak_value = bedcmm_result[max_idx_int]
                 delta_x = 0.0
             else:
-                raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+                raise Exception('interpolator_mode is parabolic,centroid,gaussian or no')
 
             ip_x = <double> search_sample[max_idx_int] + delta_x + ((bedcmm_smooth-1)/2)
             score = peak_value/mean_data
