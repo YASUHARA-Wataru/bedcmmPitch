@@ -17,6 +17,15 @@ For more details, please refer to the original repository:
 https://github.com/YASUHARA-Wataru/bedcmm
 ---
 
+## Requirements
+- numpy
+- cython
+- matplotlib
+
+Install with:
+
+pip install numpy cython matplotlib
+
 ## Functions
 
 ### calc_Pitch
