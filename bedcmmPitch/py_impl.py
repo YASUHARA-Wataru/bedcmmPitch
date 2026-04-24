@@ -410,29 +410,34 @@ def calc_bedcmm(data,
 
     if pp_mode == 'positive+negative':
         if implementation == 'Cython':
-            bedcmm_result = calc_bedcmm_negaposi_core_cy(data_pos,
+            result = calc_bedcmm_negaposi_core_cy(data_pos,
                                                          data_neg,
                                                          window_size,
                                                          hop_size,
                                                          search_sample)
+
+            bedcmm_result = result[0]
+            mean_data = result[1]
         else:
-            bedcmm_result = calc_bedcmm_negaposi_core(data_pos,
+            bedcmm_result,mean_data = calc_bedcmm_negaposi_core(data_pos,
                                                       data_neg,
                                                       window_size,
                                                       hop_size,
                                                       search_sample)
     else:
         if implementation == 'Cython':
-            bedcmm_result = calc_bedcmm_core_cy(data,
+            result = calc_bedcmm_core_cy(data,
                                                 window_size,
                                                 hop_size,
                                                 search_sample)
+            bedcmm_result = result[0]
+            mean_data = result[1]
         else:
-            bedcmm_result = calc_bedcmm_core(data,
+            bedcmm_result,mean_data = calc_bedcmm_core(data,
                                              window_size,
                                              hop_size,
                                              search_sample)
-    return bedcmm_result
+    return bedcmm_result,mean_data
 
 
 def calc_bedcmm_core(data,
@@ -441,13 +446,16 @@ def calc_bedcmm_core(data,
                      search_sample):
  
     bedcmm_result_list = []
+    mean_data_list = []
     for i in range(window_size, len(data),hop_size):
         calc_data = data[i-window_size:i]
         bedcmm_result_list.append(_periodicity(calc_data,search_sample))
+        mean_data_list.append(np.mean(calc_data))
 
     bedcmm_result = np.array(bedcmm_result_list)
+    mean_data = np.array(mean_data_list)
 
-    return bedcmm_result
+    return bedcmm_result,mean_data
 
 def calc_bedcmm_negaposi_core(data_pos,
                               data_neg,
@@ -456,14 +464,17 @@ def calc_bedcmm_negaposi_core(data_pos,
                               search_sample):
  
     bedcmm_result_list = []
+    mean_data_list = []
     for i in range(window_size, len(data_pos),hop_size):
         calc_data_posi = data_pos[i-window_size:i]
         calc_data_nega = data_neg[i-window_size:i]
         bedcmm_result_list.append(_periodicity(calc_data_posi,search_sample) + _periodicity(calc_data_nega,search_sample))
+        mean_data_list.append(np.mean(calc_data_posi)+np.mean(calc_data_nega))
 
     bedcmm_result = np.array(bedcmm_result_list)
+    mean_data = np.array(mean_data_list)
 
-    return bedcmm_result
+    return bedcmm_result,mean_data
 
 
 def main():

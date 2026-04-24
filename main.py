@@ -29,7 +29,7 @@ def main():
     window_size = 2048
     hop_size = 256
     times = np.arange(window_size, len(signal), hop_size)
-
+    """
     # default check
     print('default check')
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
@@ -161,26 +161,53 @@ def main():
                                    interpolator_mode='no')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
-
+    """
     print("bedcmm result check")
-    bedcmm_result = bedcmmPitch.calc_bedcmm(signal,
+    bedcmm_result,mean_data = bedcmmPitch.calc_bedcmm(signal,
                                             window_size=window_size,
                                             hop_size=hop_size)
+    normalize = np.tile(mean_data,(bedcmm_result.shape[1],1)).T
     plt.figure()
     plt.pcolormesh(t[times],np.arange(0,int(window_size/2)/fs,1/fs),bedcmm_result.T, shading="auto")
     plt.show()
+    plt.figure()
+    plt.pcolormesh(t[times],np.arange(0,int(window_size/2)/fs,1/fs),(bedcmm_result/normalize).T, shading="auto")
+    plt.show()
 
-    bedcmm_result = bedcmmPitch.calc_bedcmm(signal,
+    bedcmm_result,mean_data = bedcmmPitch.calc_bedcmm(signal,
                                             window_size=window_size,
                                             hop_size=hop_size,
                                             pitch_range=pitch_range)
     start_range = int(np.floor(1/pitch_range[1]*fs))
     end_range = int(np.ceil(1/pitch_range[0]*fs))
     search_time = np.arange(start_range,end_range+1)/fs
+    normalize = np.tile(mean_data,(bedcmm_result.shape[1],1)).T
+
     plt.figure()
     plt.pcolormesh(t[times],search_time,bedcmm_result.T, shading="auto")
     plt.show()
-    
+    plt.figure()
+    plt.pcolormesh(t[times],search_time,(bedcmm_result/normalize).T, shading="auto")
+    plt.show()
+
+    bedcmm_result,mean_data = bedcmmPitch.calc_bedcmm(signal,
+                                            pp_mode='positive',
+                                            window_size=window_size,
+                                            hop_size=hop_size,
+                                            pitch_range=pitch_range)
+    start_range = int(np.floor(1/pitch_range[1]*fs))
+    end_range = int(np.ceil(1/pitch_range[0]*fs))
+    search_time = np.arange(start_range,end_range+1)/fs
+    normalize = np.tile(mean_data,(bedcmm_result.shape[1],1)).T
+
+    plt.figure()
+    plt.pcolormesh(t[times],search_time,bedcmm_result.T, shading="auto")
+    plt.show()
+    plt.figure()
+    plt.pcolormesh(t[times],search_time,(bedcmm_result/normalize).T, shading="auto")
+    plt.show()
+
+
     pass
 if __name__ == "__main__":
     main()
