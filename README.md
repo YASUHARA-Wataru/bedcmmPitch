@@ -9,6 +9,40 @@ The implementation includes two main functions:
 - `calc_Pitch`: computes pitch values
 - `calc_bedcmm`: outputs intermediate periodicity analysis results
 
+## Robustness to Spike Noise (Comparison with pYIN)
+
+We compared this method with pYIN implemented in librosa under spike noise conditions.
+
+### Results
+
+#### Time-series comparison (spike ratio = 1000)
+![timeseries_comp](pic/spike_ratio_1000.png)
+
+- YIN shows large pitch errors under spike noise
+- pYIN is more stable but still degrades
+- bedcmm remains stable
+
+#### Detection rate vs spike noise
+![detect_ratio_comp](pic/spike_ratio_measure_ratio.png)
+
+Detection rate is defined as the ratio of frames where
+the pitch error is within ±5% of the ground truth.
+
+### Experimental Setup
+- Signal: 220 Hz sine wave
+- Sampling rate: 44.1 kHz
+- Spike noise: random impulses with varying amplitude ratio (see `simulation_test.py`)
+- Window size: 2048
+- Hop size: 256
+
+### Notes
+- pYIN uses default parameters from librosa
+- bedcmm uses default parameters unless otherwise noted
+- Reproducible scripts are available in `simulation_test.py`.
+
+### Summary
+bedcmm shows significantly higher robustness to spike noise compared to pYIN.
+
 ## About bedcmm
 
 `bedcmm` is a periodicity analysis method used as the core of this pitch detection algorithm.
@@ -156,6 +190,6 @@ fapow.contact[at]gmail.com
 This repository includes technology related to a patented method in Japan.
 
 The patent rights are currently granted in Japan only.
-However, this does not grant asny rights for commercial use of this software or the underlying technology.s
+However, this does not grant any rights for commercial use of this software or the underlying technology.
 
 For any commercial or production use, please contact the author.
