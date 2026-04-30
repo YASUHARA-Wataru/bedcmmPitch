@@ -150,3 +150,12 @@ The author shall not be held liable for any damages arising from the use of this
 ## Contact
 For commercial use, please contact us with a brief description of your use case.
 fapow.contact[at]gmail.com
+
+## Patent Notice
+
+This repository includes technology related to a patented method in Japan.
+
+The patent rights are currently granted in Japan only.
+However, this does not grant asny rights for commercial use of this software or the underlying technology.s
+
+For any commercial or production use, please contact the author.
