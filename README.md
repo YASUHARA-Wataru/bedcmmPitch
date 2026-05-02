@@ -69,7 +69,7 @@ pip install numpy cython matplotlib
 - `fs (44100)` : float (sampling rate)
 - `window_size (2048)` : int (window size)
 - `hop_size (256)` : int (hop size)
-- `pitch_range (None)` : [start_freq, end_freq] (search range)
+- `pitch_range ([65,2000])` : [start_freq, end_freq] (search range)
 - `pp_mode ('positive+negative')` : str (preprocessing mode: `'positive'`, `'negative'`, `'positive+negative'`, `'threshold_diff'`)
 - `pp_threshold (0)` : float (preprocessing threshold, used in `'threshold_diff'` mode)
 - `bedcmm_smooth (3)` : int (smoothing size for bedcmm result; 1 means no smoothing)
@@ -100,9 +100,35 @@ pip install numpy cython matplotlib
 
 ---
 
+## Calculation speed
+The benchmark script is ```speed_test.py```.
+Real-time factor ≈ 1.0 indicates near real-time processing.
+Values may slightly vary depending on the execution environment.
+
+### Cython
+preprocessing mode 'positive+negative'(default)(Accurate:Robust to noise and outliers)
+```
+=== Benchmark Result ===
+ audio_sec  proc_sec  real_time_factor
+        10   10.9753            1.0975
+        20   23.1892            1.1595
+        30   31.2636            1.0421
+```
+
+preprocessing mode 'positive' (Fast:Reduced computation, slightly less robust)
+```
+=== Benchmark Result ===
+ audio_sec  proc_sec  real_time_factor
+        10    4.6133            0.4613
+        20   11.0052            0.5503
+        30   17.7401            0.5913
+```
+
 ## Notes
 
 It is recommended to use the default parameters.
+
+Default calculation pitch range is 65[Hz] to 2000[Hz].
 
 You may observe differences depending on parameter settings, so feel free to experiment if needed.
 

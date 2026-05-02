@@ -59,7 +59,7 @@ pip install numpy cython matplotlib
         - fs(44100)          : float(sampling rate)
         - window_size(2048)  : int(window size)
         - hop_size(256)      : int(hop size)
-        - pitch_range(None)  : [start_freq, end_freq](range of search)
+        - pitch_range([65,2000])  : [start_freq, end_freq](range of search)
         - pp_mode('positive+negative'): str(perprocessing mode('positive','negative','positive+negative','threshould_diff'))
         - pp_threshould(0)   : float(perprocessing threshould(using in 'threshould_diff mode'))
         - bedcmm_smooth(3)   : int(bedcmm result smoothing size(if size 1 means do not smoothing))
@@ -82,14 +82,39 @@ pip install numpy cython matplotlib
         - bedcmm data:2D array data(time,bedcmm)
         - mean data:1D array data(time)
 
+## 計算速度
+計算時間の検証スクリプトは、```speed_test.py```です。
+デフォルト値でのreal_time_factorが1に近くなっており、リアルタイム処理に近くなっています。
+計算時間は検証環境により少し変化します。
+
+### Cython
+preprocessing mode 'positive+negative'(default)(Accurate:Robust to noise and outliers)
+```
+=== Benchmark Result ===
+ audio_sec  proc_sec  real_time_factor
+        10   10.9753            1.0975
+        20   23.1892            1.1595
+        30   31.2636            1.0421
+```
+
+preprocessing mode 'positive' (Fast:Reduced computation, slightly less robust)
+```
+=== Benchmark Result ===
+ audio_sec  proc_sec  real_time_factor
+        10    4.6133            0.4613
+        20   11.0052            0.5503
+        30   17.7401            0.5913
+```
+
 ## 注意点
 基本的にデフォルトパラメータで動かしてください。
+デフォルト値では、計算するピッチの範囲を65[Hz] - 2000[Hz]としました。
 差異はあると思うので、興味があればパラメータを変更してみてください。
 pitch_detect_threは、pitch_detect_modeがsocreの時は、入力信号の平均値と閾値の掛け算で、bedcmmの結果の閾値を作成します。また、pitch_detect_modeがstaticの時は、そのまま閾値として用います。また、peakの時は、計算している、bedcmmの最大ピーク値と閾値の掛け算となります。
 pitch_detect_modeがmaxの時は、pitch_rangeを絞らないとうまく機能しません。
 また、pp_modeは、デフォルトは精度が出やすく、計算が重い設定になっています。
 計算を早くしたい場合は、'positive'、'negative'といったモードも使えます。
-また、pp_modeのthreshould_diffは、全て正の値になるように設定しなければ、うまくscoreが機能しません。
+また、pp_modeのthreshold_diffは、全て正の値になるように設定しなければ、うまくscoreが機能しません。
 
 
 ## 簡易的なインストール方法

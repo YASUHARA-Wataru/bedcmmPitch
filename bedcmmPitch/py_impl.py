@@ -95,9 +95,9 @@ def _periodicity(data,period):
 
     return result    
 
-def _peak_detect_threshould(bedcmm_result,threshould):
+def _peak_detect_threshold(bedcmm_result,threshold):
 
-    priod_thre_ind = (bedcmm_result > threshould)[:-2]
+    priod_thre_ind = (bedcmm_result > threshold)[:-2]
     priod_diff = np.diff(bedcmm_result)
     plus_peaks = np.where((priod_diff[:-1] > 0) & (priod_diff[1:] * priod_diff[:-1] < 0 ) & priod_thre_ind)[0]
 
@@ -148,16 +148,16 @@ def calc_Pitch_core(data,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'score':
-            threshould = mean_data*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
+            threshold = mean_data*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold(bedcmm_result,threshold)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
+            max_idx_int = _peak_detect_threshold(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
         elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
-            threshould = peak_value*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
+            threshold = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold(bedcmm_result,threshold)
         else:
             raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
@@ -167,12 +167,12 @@ def calc_Pitch_core(data,
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
-                    if pp_mode == 'threshould_diff':
+                    if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
-                    if pp_mode == 'threshould_diff':
+                    if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
@@ -226,16 +226,16 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'score':
-            threshould = mean_data*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
+            threshold = mean_data*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold(bedcmm_result,threshold)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould(bedcmm_result,pitch_detect_thre)
+            max_idx_int = _peak_detect_threshold(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum(bedcmm_result)
         elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
-            threshould = peak_value*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould(bedcmm_result,threshould)
+            threshold = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold(bedcmm_result,threshold)
         else:
             raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
@@ -245,12 +245,12 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
-                    if pp_mode == 'threshould_diff':
+                    if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
-                    if pp_mode == 'threshould_diff':
+                    if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
                     peak_idx = search_sample[max_idx_int]+delta
@@ -282,9 +282,9 @@ def calc_Pitch(data,
                fs=44100,
                window_size=2048,
                hop_size=256,
-               pitch_range=None,
+               pitch_range=[65,2000],
                pp_mode='positive+negative',
-               pp_threshould=0,
+               pp_threshold=0,
                bedcmm_smooth=3,
                pitch_detect_mode='peak',
                pitch_detect_thre=0.85,
@@ -307,10 +307,10 @@ def calc_Pitch(data,
         data_neg = np.zeros_like(data)
         data_pos[data > 0] = data[data > 0]
         data_neg[data < 0] = -data[data < 0]
-    elif pp_mode == 'threshould_diff':
-        data = data - pp_threshould
+    elif pp_mode == 'threshold_diff':
+        data = data - pp_threshold
     else:
-        raise Exception('pp_mode is only positive,negative,positive+negative,threshould_diff.')
+        raise Exception('pp_mode is only positive,negative,positive+negative,threshold_diff.')
 
     if pitch_range is None:
         search_sample = np.arange(int(window_size/2), dtype=np.intp)
@@ -380,7 +380,7 @@ def calc_bedcmm(data,
                 hop_size=256,
                 pitch_range=None,
                 pp_mode='positive+negative',
-                pp_threshould=0):
+                pp_threshold=0):
 
     data = data.copy()
     # データ前処理
@@ -394,10 +394,10 @@ def calc_bedcmm(data,
         data_neg = np.zeros_like(data)
         data_pos[data > 0] = data[data > 0]
         data_neg[data < 0] = -data[data < 0]
-    elif pp_mode == 'threshould_diff':
-        data = data - pp_threshould
+    elif pp_mode == 'threshold_diff':
+        data = data - pp_threshold
     else:
-        raise Exception('pp_mode is only positive,negative,positive+negative,threshould_diff.')
+        raise Exception('pp_mode is only positive,negative,positive+negative,threshold_diff.')
 
     if pitch_range is None:
         search_sample = np.arange(int(window_size/2), dtype=np.intp)

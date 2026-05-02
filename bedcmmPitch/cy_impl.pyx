@@ -136,8 +136,8 @@ cdef double _min(double[:] data):
     return min
 
 
-cdef Py_ssize_t _peak_detect_threshould_cy(double[:] bedcmm_result,
-                                           DTYPE_d_t threshould):
+cdef Py_ssize_t _peak_detect_threshold_cy(double[:] bedcmm_result,
+                                           DTYPE_d_t threshold):
 
     cdef Py_ssize_t first_peak_idx,i
     cdef int prev_sign,sign
@@ -153,7 +153,7 @@ cdef Py_ssize_t _peak_detect_threshould_cy(double[:] bedcmm_result,
         else:
             sign = -1
         
-        if (prev_sign == 1) and (sign == -1) and (bedcmm_result[i] > threshould):
+        if (prev_sign == 1) and (sign == -1) and (bedcmm_result[i] > threshold):
             first_peak_idx = i - 1
             break
 
@@ -241,7 +241,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x,min,peak_value,mean_data,score
+    cdef double threshold,delta_x,ip_x,min,peak_value,mean_data,score
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] calc_data = np.zeros(window_size)
@@ -265,16 +265,16 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'score':
-            threshould = mean_data*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+            threshold = mean_data*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,threshold)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
         elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
-            threshould = peak_value*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+            threshold = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,threshold)
         else:
             raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
@@ -283,7 +283,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
                 delta_x,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'gaussian':
 
-                if pp_mode == 'threshould_diff':
+                if pp_mode == 'threshold_diff':
                     min = _min(bedcmm_result)
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
@@ -291,7 +291,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
                 delta_x,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'centroid':
             
-                if pp_mode == 'threshould_diff':
+                if pp_mode == 'threshold_diff':
                     min = _min(bedcmm_result)
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
@@ -331,7 +331,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
     cdef int i,j
     cdef double smooth_temp
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] smooth_temp_array = np.zeros(len(search_sample)-bedcmm_smooth+1)
-    cdef double threshould,delta_x,ip_x,peak_value,mean_data,score
+    cdef double threshold,delta_x,ip_x,peak_value,mean_data,score
     cdef Py_ssize_t max_idx_int
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result = np.zeros(len(search_sample))
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] bedcmm_result_posi = np.zeros(len(search_sample))
@@ -359,16 +359,16 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
             raise Exception('bedcmm_smooth > 0 and int')
         
         if pitch_detect_mode == 'score':
-            threshould = mean_data*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+            threshold = mean_data*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,threshold)
         elif pitch_detect_mode == 'static':
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,pitch_detect_thre)
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,pitch_detect_thre)
         elif pitch_detect_mode == 'maximum':
             max_idx_int = _peak_detect_maximum_cy(bedcmm_result)
         elif pitch_detect_mode == 'peak':
             peak_value = _calc_peak_max_value(bedcmm_result)
-            threshould = peak_value*pitch_detect_thre
-            max_idx_int = _peak_detect_threshould_cy(bedcmm_result,threshould)
+            threshold = peak_value*pitch_detect_thre
+            max_idx_int = _peak_detect_threshold_cy(bedcmm_result,threshold)
         else:
             raise Exception('pitch_detect_mode is score,static,maximum,peak.')
 
@@ -378,7 +378,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
 
             elif interpolator_mode == 'gaussian':
             
-                if pp_mode == 'threshould_diff':
+                if pp_mode == 'threshold_diff':
                     min = _min(bedcmm_result)
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
@@ -386,7 +386,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
                 delta_x,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
             elif interpolator_mode == 'centroid':
             
-                if pp_mode == 'threshould_diff':
+                if pp_mode == 'threshold_diff':
                     min = _min(bedcmm_result)
                     for j in range(len(bedcmm_result)):
                         bedcmm_result[i] = bedcmm_result[i] - min
