@@ -1,4 +1,5 @@
 # bedcmmPitch
+**Research / Evaluation / PoC use only.**
 ## Pitch Detection Algorithm
 
 This repository provides a pitch detection algorithm based on a periodicity analysis method.  
@@ -9,21 +10,51 @@ The implementation includes two main functions:
 - `calc_Pitch`: computes pitch values
 - `calc_bedcmm`: outputs intermediate periodicity analysis results
 
+## Installation
+
+### Install from PyPI
+
+```bash
+pip install bedcmmPitch
+```
+
+### Optional: Build Cython extension from source
+
+```bash
+python setup.py build_ext --inplace
+```
+
+## Example
+
+```python
+import numpy as np
+from bedcmmPitch import calc_Pitch
+
+fs = 44100
+t = np.arange(fs) / fs
+x = np.sin(2*np.pi*440*t)
+
+pitch, score = calc_Pitch(x)
+
+print(np.nanmean(pitch))
+```
+
 ## Robustness to Spike Noise (Comparison with pYIN)
 
 We compared this method with pYIN implemented in librosa under spike noise conditions.
 
+
 ### Results
 
 #### Time-series comparison (spike ratio = 1000)
-![timeseries_comp](pic/spike_ratio_1000.png)
+![timeseries_comp](https://raw.github.com/YASUHARA-Wataru/bedcmmPitch/main/pic/spike_ratio_1000.png)
 
 - YIN shows large pitch errors under spike noise
 - pYIN is more stable but still degrades
 - bedcmm remains stable
 
 #### Detection rate vs spike noise
-![detect_ratio_comp](pic/spike_ratio_measure_ratio.png)
+![detect_ratio_comp](https://raw.github.com/YASUHARA-Wataru/bedcmmPitch/main/pic/spike_ratio_measure_ratio.png)
 
 Detection rate is defined as the ratio of frames where
 the pitch error is within ±5% of the ground truth.
@@ -52,13 +83,10 @@ https://github.com/YASUHARA-Wataru/bedcmm
 ---
 
 ## Requirements
+
 - numpy
-- cython
-- matplotlib
 
-Install with:
-
-pip install numpy cython matplotlib
+Cython is only required when building from source.
 
 ## Functions
 
@@ -75,7 +103,7 @@ pip install numpy cython matplotlib
 - `pp_threshold (0)` : float (preprocessing threshold, used in `'threshold_diff'` mode)
 - `bedcmm_smooth (3)` : int (smoothing size for bedcmm result; 1 means no smoothing)
 - `pitch_detect_mode ('peak')` : str (peak detection mode: `'score'`, `'static'`, `'maximum'`, `'peak'`)
-- `pitch_detect_threshold (0.85)` : float (threshold for peak detection)
+- `pitch_detect_thre (0.85)` : float (threshold for peak detection)
 - `interpolator_mode ('parabolic')` : str (peak interpolation mode: `'parabolic'`, `'centroid'`, `'gaussian'`, `'no'`)
 
 **Output:**
@@ -151,7 +179,7 @@ You may observe differences depending on parameter settings, so feel free to exp
 
 ---
 
-## Quick Installation
+## for Development fast Installation
 
 1. Copy the `bedcmmPitch` folder into your working directory  
 2. Copy `setup.py` into your working directory  
@@ -163,7 +191,11 @@ You may observe differences depending on parameter settings, so feel free to exp
 
    If not installed, use `pip` or `uv` to install them.
 
-4. In your working directory, run:```python setup.py build_ext --inplace```
+4. In your working directory, run:
+
+```bash
+python setup.py build_ext --inplace
+```
 
 
 5. Run `main.py` to verify functionality
