@@ -25,9 +25,9 @@ requires = [
     "numpy"
 ]
 
+build-backend = "setuptools.build_meta"
+
 [project.optional-dependencies]
 dev = [
     "pytest",
 ]
-
-build-backend = "setuptools.build_meta"
