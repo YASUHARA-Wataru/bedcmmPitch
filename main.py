@@ -23,7 +23,8 @@ def main():
     t = np.linspace(0, duration, int(fs * duration), endpoint=False)
     f_start, f_end = 440.0, 466.16
     #f_start, f_end = 440.0, 880.0
-    pitch_range = [380,1000]
+    fmin = 380
+    fmax = 1000
     signal = np.where(t < change_time, amp*np.sin(2 * np.pi * f_start * t), amp*np.sin(2 * np.pi * f_end * t))
 
     window_size = 2048
@@ -42,7 +43,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='parabolic')
@@ -54,7 +56,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='negative',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='parabolic')
@@ -65,8 +68,9 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
-                                   pp_mode='threshould_diff',
+                                   fmin=fmin,
+                                   fmax=fmax,
+                                   pp_mode='threshold_diff',
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
 
@@ -78,7 +82,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
@@ -92,7 +97,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='static',
                                    pitch_detect_thre=0.05,
@@ -102,7 +108,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='maximum',
                                    interpolator_mode='parabolic')
@@ -111,7 +118,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='score',
                                    interpolator_mode='parabolic')
@@ -124,7 +132,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='gaussian')
@@ -134,8 +143,9 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
-                                   pp_mode='threshould_diff',
+                                   fmin=fmin,
+                                   fmax=fmax,
+                                   pp_mode='threshold_diff',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='gaussian')
     print(score)
@@ -143,18 +153,20 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='centroid')
     print(score)
     plot_pitch(t,times,Pitch,f_start,f_end)
-    print("interpolator threshould gaussian")
+    print("interpolator threshold gaussian")
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
-                                   pp_mode='threshould_diff',
+                                   fmin=fmin,
+                                   fmax=fmax,
+                                   pp_mode='threshold_diff',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='centroid')
 
@@ -164,7 +176,8 @@ def main():
     Pitch,score = bedcmmPitch.calc_Pitch(signal,
                                    window_size=window_size,
                                    hop_size=hop_size,
-                                   pitch_range=pitch_range,
+                                   fmin=fmin,
+                                   fmax=fmax,
                                    pp_mode='positive',
                                    pitch_detect_mode='peak',
                                    interpolator_mode='no')
@@ -186,9 +199,10 @@ def main():
     bedcmm_result,mean_data = bedcmmPitch.calc_bedcmm(signal,
                                             window_size=window_size,
                                             hop_size=hop_size,
-                                            pitch_range=pitch_range)
-    start_range = int(np.floor(1/pitch_range[1]*fs))
-    end_range = int(np.ceil(1/pitch_range[0]*fs))
+                                            fmin=fmin,
+                                            fmax=fmax)
+    start_range = int(np.floor(1/fmax*fs))
+    end_range = int(np.ceil(1/fmin*fs))
     search_time = np.arange(start_range,end_range+1)/fs
     normalize = np.tile(mean_data,(bedcmm_result.shape[1],1)).T
 
@@ -203,9 +217,10 @@ def main():
                                             pp_mode='positive',
                                             window_size=window_size,
                                             hop_size=hop_size,
-                                            pitch_range=pitch_range)
-    start_range = int(np.floor(1/pitch_range[1]*fs))
-    end_range = int(np.ceil(1/pitch_range[0]*fs))
+                                            fmin=fmin,
+                                            fmax=fmax)
+    start_range = int(np.floor(1/fmax*fs))
+    end_range = int(np.ceil(1/fmin*fs))
     search_time = np.arange(start_range,end_range+1)/fs
     normalize = np.tile(mean_data,(bedcmm_result.shape[1],1)).T
 

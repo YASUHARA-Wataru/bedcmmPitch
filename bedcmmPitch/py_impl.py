@@ -282,7 +282,8 @@ def calc_Pitch(data,
                fs=44100,
                window_size=2048,
                hop_size=256,
-               pitch_range=[65,2000],
+               fmin=65,
+               fmax=2000,
                pp_mode='positive+negative',
                pp_threshold=0,
                bedcmm_smooth=3,
@@ -312,14 +313,20 @@ def calc_Pitch(data,
     else:
         raise Exception('pp_mode is only positive,negative,positive+negative,threshold_diff.')
 
-    if pitch_range is None:
-        search_sample = np.arange(int(window_size/2), dtype=np.intp)
+    if fmin is None:
+        if fmax is None:
+            search_sample = np.arange(int(window_size/2), dtype=np.intp)
+        else:
+            start_range = int(np.floor(1/fmax*fs))
+            search_sample = np.arange(start_range,int(window_size/2), dtype=np.intp)
     else:
-        if len(pitch_range) != 2:
-            raise Exception('pitch_rage is [min freq(low), max freq(high)].')
-        start_range = int(np.floor(1/pitch_range[1]*fs))
-        end_range = int(np.ceil(1/pitch_range[0]*fs))
-        search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+        if fmax is None:
+            end_range = int(np.ceil(1/fmin*fs))
+            search_sample = np.arange(end_range+1, dtype=np.intp)
+        else:
+            start_range = int(np.floor(1/fmax*fs))
+            end_range = int(np.ceil(1/fmin*fs))
+            search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
 
     # 処理実行
     if pp_mode == 'positive+negative':
@@ -378,7 +385,8 @@ def calc_bedcmm(data,
                 fs=44100,
                 window_size=2048,
                 hop_size=256,
-                pitch_range=None,
+                fmax=None,
+                fmin=None,
                 pp_mode='positive+negative',
                 pp_threshold=0):
 
@@ -399,14 +407,20 @@ def calc_bedcmm(data,
     else:
         raise Exception('pp_mode is only positive,negative,positive+negative,threshold_diff.')
 
-    if pitch_range is None:
-        search_sample = np.arange(int(window_size/2), dtype=np.intp)
+    if fmin is None:
+        if fmax is None:
+            search_sample = np.arange(int(window_size/2), dtype=np.intp)
+        else:
+            start_range = int(np.floor(1/fmax*fs))
+            search_sample = np.arange(start_range,int(window_size/2), dtype=np.intp)
     else:
-        if len(pitch_range) != 2:
-            raise Exception('pitch_rage is [start freq(low), end freq(high)].')
-        start_range = int(np.floor(1/pitch_range[1]*fs))
-        end_range = int(np.ceil(1/pitch_range[0]*fs))
-        search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+        if fmax is None:
+            end_range = int(np.ceil(1/fmin*fs))
+            search_sample = np.arange(end_range+1, dtype=np.intp)
+        else:
+            start_range = int(np.floor(1/fmax*fs))
+            end_range = int(np.ceil(1/fmin*fs))
+            search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
 
     if pp_mode == 'positive+negative':
         if implementation == 'Cython':

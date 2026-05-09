@@ -105,7 +105,7 @@ def main():
     hop_size = 256
     times = np.arange(window_size, len(signal), hop_size)
 
-    fo_bedcmm, bedcmm_score = bedcmmPitch.calc_Pitch(signal,pp_mode='positive+negative',pitch_range=[65,1220],window_size=window_size)
+    fo_bedcmm, bedcmm_score = bedcmmPitch.calc_Pitch(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
 
     fo_bedcmm[bedcmm_score < 0.5] = np.nan
 
