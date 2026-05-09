@@ -31,3 +31,8 @@ build-backend = "setuptools.build_meta"
 dev = [
     "pytest",
 ]
+
+[project.urls]
+Homepage = "https://github.com/YASUHARA-Wataru/bedcmmPitch"
+Repository = "https://github.com/YASUHARA-Wataru/bedcmmPitch"
+Issues = "https://github.com/YASUHARA-Wataru/bedcmmPitch/issues"

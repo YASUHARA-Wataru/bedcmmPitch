@@ -1,1 +1,2 @@
 include bedcmmPitch/*.pyx
+recursive-include pic *.png
