@@ -69,7 +69,7 @@ pip install numpy cython matplotlib
 - `fs (44100)` : float (sampling rate)
 - `window_size (2048)` : int (window size)
 - `hop_size (256)` : int (hop size)
-- `min(65)` : float(calculation min freq)
+- `fmin(65)` : float(calculation min freq)
 - `fmax(2000)` : float(calculation max freq)
 - `pp_mode ('positive+negative')` : str (preprocessing mode: `'positive'`, `'negative'`, `'positive+negative'`, `'threshold_diff'`)
 - `pp_threshold (0)` : float (preprocessing threshold, used in `'threshold_diff'` mode)
@@ -91,7 +91,8 @@ pip install numpy cython matplotlib
 - `fs (44100)` : float (sampling rate)
 - `window_size (2048)` : int (window size)
 - `hop_size (256)` : int (hop size)
-- `pitch_range (None)` : [start_freq, end_freq] (search range)
+- `fmin(None)` : float(calculation min freq)
+- `fmax(None)` : float(calculation max freq)
 - `pp_mode ('positive')` : str (preprocessing mode)
 - `pp_threshold (0)` : float (used in `'threshold_diff'` mode)
 

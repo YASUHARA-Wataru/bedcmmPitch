@@ -57,10 +57,10 @@ def benchmark(durations=[10, 20, 30], sr=44100, repeat=3):
 
     return pd.DataFrame(results)
 
-
 # ====== 実行 ======
 if __name__ == "__main__":
     df = benchmark(repeat=5)
 
     print("\n=== Benchmark Result ===")
     print(df.to_string(index=False, float_format="%.4f"))
+    

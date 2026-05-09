@@ -1,18 +1,33 @@
 [project]
 name = "bedcmmPitch"
 version = "0.1.0"
-description = "Add your description here"
+description = "Pitch detection using periodicity analysis"
 readme = "README.md"
 requires-python = ">=3.9"
+
 authors = [
     { name = "WATARU YASUHARA" }
 ]
+
 classifiers = [
-    "Programming Language :: Python :: 3"
+    "Programming Language :: Python :: 3",
 ]
+
 dependencies = [
-    "cython>=3.2.4",
-    "matplotlib>=3.9.4",
     "numpy>=2.0.2",
-    "pytest>=8.4.2",
 ]
+
+[build-system]
+requires = [
+    "setuptools>=61",
+    "wheel",
+    "Cython",
+    "numpy"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+build-backend = "setuptools.build_meta"

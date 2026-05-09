@@ -376,6 +376,10 @@ def calc_Pitch(data,
                                     pitch_detect_thre,
                                     interpolator_mode)
 
+    Pitch = np.array(Pitch)
+    if Pitch.size == 0:
+        return np.array([]), np.array([])
+
     Pitch_data = Pitch[:,0]
     Pitch_score = Pitch[:,1]
 

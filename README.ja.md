@@ -76,7 +76,8 @@ pip install numpy cython matplotlib
         - fs(44100)          : float(sampling rate)
         - window_size(2048)  : int(window size)
         - hop_size(256)      : int(hop size)
-        - pitch_range(None)  : [start_freq, end_freq](range of search)
+        - fmin(None)         : float(calculation min freq)
+        - fmax(None)         : float(calculation max freq)
         - pp_mode('positive'): str(perprocessing mode('positive','negative','positive+negative','threshold_diff'))
         - pp_threshold(0)   : float(perprocessing threshold(using in 'threshold_diff mode'))
     - output

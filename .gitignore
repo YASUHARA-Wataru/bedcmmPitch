@@ -27,4 +27,7 @@ dist/
 # テスト用ファイル
 *.egg-info
 
+# pytest_cache
+.pytest_cache/
+
 # 例外
