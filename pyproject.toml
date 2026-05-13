@@ -1,10 +1,11 @@
 [project]
 name = "bedcmmPitch"
-version = "0.1.4"
+version = "0.1.5"
 description = "Pitch detection using periodicity analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "Custom"}
+license = "LicenseRef-Proprietary"
+license-files = ["LICENSE"]
 authors = [
     { name = "WATARU YASUHARA" }
 ]
