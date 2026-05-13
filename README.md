@@ -1,4 +1,8 @@
 # bedcmmPitch
+![CI](https://github.com/YASUHARA-Wataru/bedcmmPitch/actions/workflows/ci_test.yml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/bedcmmPitch.svg)](https://badge.fury.io/py/bedcmmPitch)
+![Python Versions](https://img.shields.io/pypi/pyversions/bedcmmPitch)
+
 **Research / Evaluation / PoC use only.**
 ## Pitch Detection Algorithm
 
