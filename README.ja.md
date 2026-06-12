@@ -100,6 +100,43 @@ https://github.com/YASUHARA-Wataru/bedcmm
     - output
         - Pitch data:1D array data(pitch data)
         - score data:1D array data(bedcmm score)
+
+- calc_Pitch_with_bayes
+    - input(default) : datade description
+        - data               : 1D array data(signal data)
+        - fs(44100)          : float(sampling rate)
+        - window_size(2048)  : int(window size)
+        - hop_size(256)      : int(hop size)
+        - fmin(65)           : float(calculation min freq)
+        - fmax(2000)         : float(calculation max freq)
+        - pp_mode('positive+negative'): str(perprocessing mode('positive','negative','positive+negative','threshold_diff'))
+        - pp_threshold(0)   : float(perprocessing threshold(using in 'threshold_diff mode'))
+        - alpha(0.7)        : float(bayesain tracking parameter)
+        - sigma(0.1)        : float(pitch conversion parameter)
+        - interpolator_mode('parabolic'): str(peak index interpolator mode('parabolic','centroid','gaussian', 'no'))
+    - output
+        - Pitch data:1D array data(pitch data)
+        - score data:1D array data(bedcmm score)
+        - prob  data:1D array data(probability)
+
+- calc_Pitch_with_viterbi
+    - input(default) : datade description
+        - data               : 1D array data(signal data)
+        - fs(44100)          : float(sampling rate)
+        - window_size(2048)  : int(window size)
+        - hop_size(256)      : int(hop size)
+        - fmin(65)           : float(calculation min freq)
+        - fmax(2000)         : float(calculation max freq)
+        - pp_mode('positive+negative'): str(perprocessing mode('positive','negative','positive+negative','threshold_diff'))
+        - pp_threshold(0)   : float(perprocessing threshold(using in 'threshold_diff mode'))
+        - beta(10)          : float(Viterbi control parameter)
+        - sigma(0.1)        : float(pitch conversion parameter)
+        - interpolator_mode('parabolic'): str(peak index interpolator mode('parabolic','centroid','gaussian', 'no'))
+    - output
+        - Pitch data:1D array data(pitch data)
+        - score data:1D array data(bedcmm score)
+        - prob  data:1D array data(probability)
+
 - calc_bedcmm
     - input
         - data               : 1D array data(signal data)

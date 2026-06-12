@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from bedcmmPitch import calc_Pitch, calc_bedcmm
+from bedcmmPitch import calc_Pitch, calc_bedcmm ,calc_Pitch_with_bayes,calc_Pitch_with_viterbi
 
 
 def generate_sine(
@@ -13,7 +13,8 @@ def generate_sine(
     amplitude=1.0
 ):
     t = np.arange(int(fs * duration)) / fs
-    return amplitude * np.sin(2 * np.pi * freq * t)
+    wave = amplitude * np.sin(2 * np.pi * freq * t)
+    return wave
 
 
 def test_import():
@@ -77,6 +78,116 @@ def test_calc_pitch_detect_440hz():
     # ±10Hzくらいの緩い判定
     assert abs(mean_pitch - 440.0) < 10.0
 
+def test_calc_pitch_with_bayes_runs():
+    """
+    calc_Pitch が正常終了する
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        fs=44100,
+        window_size=2048,
+        hop_size=256,
+    )
+
+    assert pitch is not None
+    assert score is not None
+    assert prob is not None
+
+def test_calc_pitch_with_bayes_shape():
+    """
+    pitch と score の shape が一致
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(x)
+
+    assert pitch.shape == score.shape
+    assert pitch.shape == prob.shape
+    assert pitch.ndim == 1
+
+
+def test_calc_pitch_with_bayes_detect_440hz():
+    """
+    440Hz を大まかに検出できる
+    """
+    x = generate_sine(freq=440.0)
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        fs=44100,
+        window_size=4096,
+        hop_size=512,
+        alpha=0.5,
+        fmin=100,
+        fmax=2000,
+    )
+
+    valid_pitch = pitch[~np.isnan(pitch)]
+
+    assert len(valid_pitch) > 0
+
+    mean_pitch = np.mean(valid_pitch)
+
+    # ±10Hzくらいの緩い判定
+    assert abs(mean_pitch - 440.0) < 10.0
+
+def test_calc_pitch_with_viterbi_runs():
+    """
+    calc_Pitch が正常終了する
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        fs=44100,
+        window_size=2048,
+        hop_size=256,
+    )
+
+    assert pitch is not None
+    assert score is not None
+    assert prob is not None
+
+def test_calc_pitch_with_viterbi_shape():
+    """
+    pitch と score の shape が一致
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(x)
+
+    assert pitch.shape == score.shape
+    assert pitch.shape == prob.shape
+    assert pitch.ndim == 1
+
+
+def test_calc_pitch_with_viterbi_detect_440hz():
+    """
+    440Hz を大まかに検出できる
+    """
+    x = generate_sine(freq=440.0)
+
+    pitch, score , prob = calc_Pitch_with_viterbi(
+        x,
+        fs=44100,
+        window_size=4096,
+        hop_size=512,
+        fmin=100,
+        fmax=1000,
+    )
+
+    valid_pitch = pitch[~np.isnan(pitch)]
+
+    assert len(valid_pitch) > 0
+
+    mean_pitch = np.mean(valid_pitch)
+
+    # ±10Hzくらいの緩い判定
+    assert abs(mean_pitch - 440.0) < 10.0
+
+
 
 def test_calc_bedcmm_runs():
     """
@@ -136,6 +247,53 @@ def test_pp_modes(pp_mode):
     assert pitch is not None
     assert score is not None
 
+@pytest.mark.parametrize(
+    "pp_mode",
+    [
+        "positive",
+        "negative",
+        "positive+negative",
+        "threshold_diff",
+    ]
+)
+def test_pp_modes_with_bayes(pp_mode):
+    """
+    pp_mode が全て動作する
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        pp_mode=pp_mode
+    )
+
+    assert pitch is not None
+    assert score is not None
+    assert prob is not None
+
+@pytest.mark.parametrize(
+    "pp_mode",
+    [
+        "positive",
+        "negative",
+        "positive+negative",
+        "threshold_diff",
+    ]
+)
+def test_pp_modes_with_viterbi(pp_mode):
+    """
+    pp_mode が全て動作する
+    """
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        pp_mode=pp_mode
+    )
+
+    assert pitch is not None
+    assert score is not None
+    assert prob is not None
 
 def test_invalid_pp_mode():
     """
@@ -149,6 +307,32 @@ def test_invalid_pp_mode():
             pp_mode="invalid_mode"
         )
 
+def test_invalid_pp_mode_with_bayes():
+    """
+    不正 pp_mode で例外
+    """
+    x = generate_sine()
+
+    with pytest.raises(Exception):
+        calc_Pitch_with_bayes(
+            x,
+            pp_mode="invalid_mode"
+        )
+
+
+def test_invalid_pp_mode_viterbi():
+    """
+    不正 pp_mode で例外
+    """
+    x = generate_sine()
+
+    with pytest.raises(Exception):
+        calc_Pitch_with_viterbi(
+            x,
+            pp_mode="invalid_mode"
+        )
+
+
 @pytest.mark.parametrize(
     "mode",
     [
@@ -158,7 +342,6 @@ def test_invalid_pp_mode():
         "no",
     ]
 )
-
 def test_interpolator_modes(mode):
 
     x = generate_sine()
@@ -169,6 +352,47 @@ def test_interpolator_modes(mode):
     )
 
     assert pitch is not None
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "parabolic",
+        "gaussian",
+        "centroid",
+        "no",
+    ]
+)
+def test_interpolator_modes_with_bayes(mode):
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        interpolator_mode=mode
+    )
+
+    assert pitch is not None
+
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "parabolic",
+        "gaussian",
+        "centroid",
+        "no",
+    ]
+)
+def test_interpolator_modes_with_viterbi(mode):
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        interpolator_mode=mode
+    )
+
+    assert pitch is not None
+
 
 @pytest.mark.parametrize(
     "mode",
@@ -202,12 +426,61 @@ def test_fmin_only():
 
     assert pitch is not None
 
+def test_fmin_only_with_bayes():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        fmin=80,
+        fmax=None
+    )
+
+    assert pitch is not None
+
+
+def test_fmin_only_with_viterbi():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        fmin=80,
+        fmax=None
+    )
+
+    assert pitch is not None
+
 
 def test_fmax_only():
 
     x = generate_sine()
 
     pitch, score = calc_Pitch(
+        x,
+        fmin=None,
+        fmax=1000
+    )
+
+    assert pitch is not None
+
+def test_fmax_only_with_bayes():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        fmin=None,
+        fmax=1000
+    )
+
+    assert pitch is not None
+
+def test_fmax_only_with_viterbi():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
         x,
         fmin=None,
         fmax=1000
@@ -227,6 +500,31 @@ def test_no_fmin_fmax():
     )
 
     assert pitch is not None
+
+def test_no_fmin_fmax_with_bayes():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        fmin=None,
+        fmax=None
+    )
+
+    assert pitch is not None
+
+def test_no_fmin_fmax_with_viterbi():
+
+    x = generate_sine()
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        fmin=None,
+        fmax=None
+    )
+
+    assert pitch is not None
+
 
 def test_bedcmm_smooth():
 
@@ -260,6 +558,27 @@ def test_nan_input():
 
     assert pitch is not None
 
+def test_nan_input_with_bayes():
+
+    x = generate_sine()
+
+    x[100:200] = np.nan
+
+    pitch, score, prob = calc_Pitch_with_bayes(x)
+
+    assert pitch is not None
+
+def test_nan_input_with_viterbi():
+
+    x = generate_sine()
+
+    x[100:200] = np.nan
+
+    pitch, score, prob = calc_Pitch_with_viterbi(x)
+
+    assert pitch is not None
+
+
 def test_short_input():
 
     x = np.zeros(100)
@@ -271,10 +590,49 @@ def test_short_input():
 
     assert len(pitch) == 0
 
+def test_short_input_with_bayes():
+
+    x = np.zeros(100)
+
+    pitch, score, prob = calc_Pitch_with_bayes(
+        x,
+        window_size=2048
+    )
+
+    assert len(pitch) == 0
+
+def test_short_input_with_viterbi():
+
+    x = np.zeros(100)
+
+    pitch, score, prob = calc_Pitch_with_viterbi(
+        x,
+        window_size=2048
+    )
+
+    assert len(pitch) == 0
+
+
 def test_silence():
 
     x = np.zeros(44100)
 
     pitch, score = calc_Pitch(x)
+
+    assert pitch is not None
+
+def test_silence_with_bayes():
+
+    x = np.zeros(44100)
+
+    pitch, score, prob = calc_Pitch_with_bayes(x)
+
+    assert pitch is not None
+
+def test_silence_with_viterbi():
+
+    x = np.zeros(44100)
+
+    pitch, score, prob = calc_Pitch_with_viterbi(x)
 
     assert pitch is not None

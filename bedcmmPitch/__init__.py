@@ -1,7 +1,7 @@
 # bedcmmPitch/__init__.py
 from ._config import implementation
 import warnings
-from .py_impl import calc_Pitch,calc_bedcmm
+from .py_impl import calc_Pitch,calc_bedcmm,calc_Pitch_with_bayes,calc_Pitch_with_viterbi
 import sys
 
 if implementation != 'Cython':
@@ -16,4 +16,4 @@ if implementation != 'Cython':
         RuntimeWarning
     )
 
-__all__ = ['calc_Pitch','calc_bedcmm']
+__all__ = ['calc_Pitch','calc_bedcmm','calc_Pitch_with_bayes','calc_Pitch_with_viterbi']

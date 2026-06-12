@@ -90,7 +90,7 @@ def main():
     fs = 44100
     if pattern == 'spike_noise':
         # スパイクノイズパターン
-        sig = generate_signal(fs=fs)
+        sig = generate_signal(fs=fs,duration=0.2)
         # ノイズ付加
         sig_spike = add_spike_noise(sig, fs, spike_rate=500)
         signal = add_white_noise(sig_spike, snr_db=10)
@@ -106,6 +106,8 @@ def main():
     times = np.arange(window_size, len(signal), hop_size)
 
     fo_bedcmm, bedcmm_score = bedcmmPitch.calc_Pitch(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
+    fo_bedcmm_bayes, bedcmm_score_bayes,bayes_prob = bedcmmPitch.calc_Pitch_with_bayes(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
+    fo_bedcmm_viterbi, bedcmm_score_viterbi,viterbi_prob = bedcmmPitch.calc_Pitch_with_viterbi(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
 
     fo_bedcmm[bedcmm_score < 0.5] = np.nan
 
@@ -113,6 +115,8 @@ def main():
     fig,ax =plt.subplots(2,1,figsize=(8, 6),sharex=True)
     plt.suptitle("Response Time Comparison: (YIN vs pYIN) vs bedcmm")
     ax[0].plot(t[times], fo_bedcmm, label='bedcmm', linewidth=2,c='g', alpha=0.7)
+    ax[0].plot(t[times], fo_bedcmm_bayes, label='bedcmm bayes', linewidth=1.5,c='b', alpha=0.7)
+    ax[0].plot(t[times], fo_bedcmm_viterbi, label='bedcmm viterbi', linewidth=1,c='r', alpha=0.7)
     f_start, f_end = 100.0,300.0
     f_min = min(f_start-(f_end-f_start)*0.2,f_end+(f_end-f_start)*0.2)
     f_max = max(f_start-(f_end-f_start)*0.2,f_end+(f_end-f_start)*0.2)
