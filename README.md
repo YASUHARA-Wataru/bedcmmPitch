@@ -10,8 +10,10 @@ This repository provides a pitch detection algorithm based on a periodicity anal
 It is intended for research and Proof of Concept (PoC) use.
 Robust to spike-like noise and impulsive artifacts.
 
-The implementation includes two main functions:
+The implementation includes four main functions:
 - `calc_Pitch`: computes pitch values
+- `calc_Pitch_with_bayes`: computes pitch values with bayesain(for on-line)
+- `calc_Pitch_with_viterbi`: computes pitch values with viterbi(for off-line)
 - `calc_bedcmm`: outputs intermediate periodicity analysis results
 
 ## Installation

@@ -6,7 +6,11 @@
 **Research / Evaluation / PoC use only.**
 ## ピッチ検出アルゴリズム
 周期性解析手法を用いたピッチ検出のアルゴリズムで、研究、PoCで用いるためのリポジトリです。
-Pitchを計算するcalc_Pitch関数と途中の周期性解析の情報を出力するcalc_bedcmmの二つの関数があります。
+周期性解析のスコアを用いてPitchを計算するcalc_Pitch関数、
+周期性解析のスコアを時系列でベイズ推定を用いてPitchを計算する、calc_Pitch_with_bayes関数、
+周期性解析のスコアをViterbiという手法を用いてPitchをオフラインで計算する、calc_Pitch_with_viterbi関数、
+途中の周期性解析の情報を出力するcalc_bedcmmの四つ関数を持っています。
+
 スパイク状のノイズに対して強いピッチ検出手法です。
 
 ## Installation
