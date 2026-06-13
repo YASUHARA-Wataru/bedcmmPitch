@@ -210,7 +210,7 @@ cdef Py_ssize_t _peak_detect_maximum_cy(double[:] bedcmm_result):
         prev_sign = sign
 
     if len(peaks) == 0:
-        max_index = np.nan
+        max_index = 0
     else:
         # 最大値の取得
         max_value = -INFINITY
@@ -481,29 +481,20 @@ cpdef calc_bedcmm_negaposi_core_cy(double[:] data_posi,
 
     return bedcmm_result,mean_data
 
-cpdef cnp.ndarray[DTYPE_d_t, ndim=1] _prev_first_peak_zero(double[:] data):
+cpdef cnp.ndarray[DTYPE_d_t, ndim=1] _prev_first_up_zero(double[:] data):
 
     cdef cnp.ndarray[DTYPE_d_t, ndim=1] result = np.copy(data)
-    cdef Py_ssize_t first_peak_idx = 0
+    cdef Py_ssize_t first_up_idx = len(data)-1
     # ピークの取得
-    cdef int prev_sign = 0
-    cdef int sign = 0
     cdef Py_ssize_t i
 
     for i in range(1,len(data)):
         if (data[i] - data[i-1]) > 0:
-            sign = 1
-        else:
-            sign = -1
-        
-        if prev_sign*sign == -1:
-            first_peak_idx = i
+            first_up_idx = i - 1
             break
 
-        prev_sign = sign
-
-    if (first_peak_idx != 0):
-        for i in range(first_peak_idx):
+    if (first_up_idx != len(data)-1):
+        for i in range(first_up_idx):
             result[i] = 0
     else:
         for i in range(len(data)):
@@ -613,7 +604,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_bayes_negaposi_core_cy(double[:]
         calc_data_nega = np.asarray(data_nega[i-window_size:i])
         mean_data = _mean(calc_data_posi)+_mean(calc_data_nega)
         bedcmm_result = _periodicity_1d_core_cy(calc_data_posi,search_sample) + _periodicity_1d_core_cy(calc_data_nega,search_sample)
-        likelihoods = _prev_first_peak_zero(bedcmm_result)
+        likelihoods = _prev_first_up_zero(bedcmm_result)
         likelihoods = _probability(likelihoods)
 
         if _sum(posterior) < 0.1:
@@ -698,7 +689,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_bayes_core_cy(double[:] data,
         calc_data = np.asarray(data[i-window_size:i])
         mean_data = _mean(calc_data)
         bedcmm_result = _periodicity_1d_core_cy(calc_data,search_sample)
-        likelihoods = _prev_first_peak_zero(bedcmm_result)
+        likelihoods = _prev_first_up_zero(bedcmm_result)
         likelihoods = _probability(likelihoods)
 
         if _sum(posterior) < 0.5:
@@ -920,7 +911,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_viterbi_negaposi_core_cy(double[
         bedcmm_result = _periodicity_1d_core_cy(calc_data_posi,search_sample) + _periodicity_1d_core_cy(calc_data_nega,search_sample)
         bedcmm_result_list.append(bedcmm_result)
 
-        likelihoods = _prev_first_peak_zero(bedcmm_result)
+        likelihoods = _prev_first_up_zero(bedcmm_result)
         likelihoods = _probability(likelihoods)
         likelihood_list.append(likelihoods)
 
@@ -1017,7 +1008,7 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_viterbi_core_cy(double[:] data,
         bedcmm_result = _periodicity_1d_core_cy(calc_data,search_sample)
         bedcmm_result_list.append(bedcmm_result)
 
-        likelihoods = _prev_first_peak_zero(bedcmm_result)
+        likelihoods = _prev_first_up_zero(bedcmm_result)
         likelihoods = _probability(likelihoods)
         likelihood_list.append(likelihoods)
 

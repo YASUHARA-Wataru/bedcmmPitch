@@ -90,7 +90,7 @@ def main():
     fs = 44100
     if pattern == 'spike_noise':
         # スパイクノイズパターン
-        sig = generate_signal(fs=fs,duration=0.2)
+        sig = generate_signal(fs=fs,duration=0.5)
         # ノイズ付加
         sig_spike = add_spike_noise(sig, fs, spike_rate=500)
         signal = add_white_noise(sig_spike, snr_db=10)

@@ -556,11 +556,11 @@ def calc_Pitch_bayes_negaposi_core(data_posi,data_nega,
         mean_data = np.mean(calc_data_posi)+np.mean(calc_data_nega)
 
         priod_diff = np.diff(bedcmm_result)
-        peaks = np.where(priod_diff[1:] * priod_diff[:-1] < 0 )[0]
+        up_inds = np.where(priod_diff > 0 )[0]
 
         likelihoods = np.zeros_like(bedcmm_result)
-        if len(peaks) > 0:
-            likelihoods[peaks[0]+1:] = bedcmm_result[peaks[0]+1:]
+        if len(up_inds) > 0:
+            likelihoods[up_inds[0]:] = bedcmm_result[up_inds[0]:]
         else:
             likelihoods = np.ones_like(bedcmm_result)/len(bedcmm_result)
 
@@ -644,11 +644,11 @@ def calc_Pitch_bayes_core(data,
         mean_data = np.mean(calc_data)
 
         priod_diff = np.diff(bedcmm_result)
-        peaks = np.where(priod_diff[1:] * priod_diff[:-1] < 0 )[0]
+        up_inds = np.where(priod_diff > 0 )[0]
 
         likelihoods = np.zeros_like(bedcmm_result)
-        if len(peaks) > 0:
-            likelihoods[peaks[0]+1:] = bedcmm_result[peaks[0]+1:]
+        if len(up_inds) > 0:
+            likelihoods[up_inds[0]:] = bedcmm_result[up_inds[0]:]
         else:
             likelihoods = np.ones_like(bedcmm_result)/len(bedcmm_result)
 
@@ -900,11 +900,11 @@ def calc_Pitch_viterbi_negaposi_core(data_posi,data_nega,
         mean_data_list.append(mean_data)
 
         priod_diff = np.diff(bedcmm_result)
-        peaks = np.where(priod_diff[1:] * priod_diff[:-1] < 0 )[0]
+        up_inds = np.where(priod_diff > 0 )[0]
 
         likelihoods = np.zeros_like(bedcmm_result)
-        if len(peaks) > 0:
-            likelihoods[peaks[0]+1:] = bedcmm_result[peaks[0]+1:]
+        if len(up_inds) > 0:
+            likelihoods[up_inds[0]:] = bedcmm_result[up_inds[0]:]
         else:
             likelihoods = np.ones_like(bedcmm_result)/len(bedcmm_result)
 
@@ -988,11 +988,11 @@ def calc_Pitch_viterbi_core(data,
         mean_data_list.append(mean_data)
 
         priod_diff = np.diff(bedcmm_result)
-        peaks = np.where(priod_diff[1:] * priod_diff[:-1] < 0 )[0]
+        up_inds = np.where(priod_diff > 0 )[0]
 
         likelihoods = np.zeros_like(bedcmm_result)
-        if len(peaks) > 0:
-            likelihoods[peaks[0]+1:] = bedcmm_result[peaks[0]+1:]
+        if len(up_inds) > 0:
+            likelihoods[up_inds[0]:] = bedcmm_result[up_inds[0]:]
         else:
             likelihoods = np.ones_like(bedcmm_result)/len(bedcmm_result)
 
