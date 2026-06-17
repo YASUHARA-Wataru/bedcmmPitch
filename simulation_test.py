@@ -105,9 +105,9 @@ def main():
     hop_size = 256
     times = np.arange(window_size, len(signal), hop_size)
 
-    fo_bedcmm, bedcmm_score = bedcmmPitch.calc_Pitch(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
+    fo_bedcmm, bedcmm_score = bedcmmPitch.calc_Pitch(signal,pp_mode='positive+negative',fmin=30,fmax=1220,window_size=window_size)
     fo_bedcmm_bayes, bedcmm_score_bayes,bayes_prob = bedcmmPitch.calc_Pitch_with_bayes(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
-    fo_bedcmm_viterbi, bedcmm_score_viterbi,viterbi_prob = bedcmmPitch.calc_Pitch_with_viterbi(signal,pp_mode='positive+negative',fmin=65,fmax=1220,window_size=window_size)
+    fo_bedcmm_viterbi, bedcmm_score_viterbi,viterbi_prob = bedcmmPitch.calc_Pitch_with_viterbi(signal,pp_mode='positive+negative',fmin=30,fmax=1220,window_size=window_size)
 
     fo_bedcmm[bedcmm_score < 0.5] = np.nan
 

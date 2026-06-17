@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+import warnings
 
 from bedcmmPitch import calc_Pitch, calc_bedcmm ,calc_Pitch_with_bayes,calc_Pitch_with_viterbi
 
@@ -636,3 +637,52 @@ def test_silence_with_viterbi():
     pitch, score, prob = calc_Pitch_with_viterbi(x)
 
     assert pitch is not None
+
+def test_invalid_fmin():
+    """
+    不正 fmin で例外
+    """
+    x = generate_sine()
+
+    with pytest.raises(Exception):
+        calc_Pitch(
+            x,
+            fmin=10
+        )
+
+def test_invalid_fmin_bayes():
+    """
+    不正 fmin で例外
+    """
+    x = generate_sine()
+
+    with pytest.raises(Exception):
+        calc_Pitch_with_bayes(
+            x,
+            fmin=30
+        )
+
+def test_invalid_fmin_viterbi():
+    """
+    不正 fmin で例外
+    """
+    x = generate_sine()
+
+    with pytest.raises(Exception):
+        calc_Pitch_with_viterbi(
+            x,
+            fmin=30
+        )
+
+def test_invalid_fmin():
+    """
+    不正 fmin で警告
+    """
+    x = generate_sine()
+    with pytest.warns():
+        calc_Pitch(
+            x,
+            fmin=30
+        )
+
+

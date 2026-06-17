@@ -7,6 +7,7 @@ Copyright (c) 2026, Feel a Piece of the World
 """
 import numpy as np
 import math
+import warnings
 from ._config import implementation
 if implementation == 'Cython':
     from .cy_impl import calc_Pitch_core_cy,calc_Pitch_negaposi_core_cy,calc_bedcmm_core_cy,calc_bedcmm_negaposi_core_cy
@@ -329,6 +330,11 @@ def calc_Pitch(data,
             start_range = int(np.floor(1/fmax*fs))
             end_range = int(np.ceil(1/fmin*fs))
             search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+    
+        if end_range > window_size:
+            raise Exception(f'fmin must be lager than {fs/window_size} Hz')
+        elif end_range > (window_size//2):
+            warnings.warn(f'fmin might be lager than {fs/(window_size//2)} Hz')
 
     # 処理実行
     if pp_mode == 'positive+negative':
@@ -397,6 +403,8 @@ def calc_bedcmm(data,
                 pp_threshold=0):
 
     data = data.copy()
+    data = np.ascontiguousarray(data, dtype=np.float64)
+
     # データ前処理
     if pp_mode == 'positive':
         data[data < 0] = 0
@@ -427,6 +435,11 @@ def calc_bedcmm(data,
             start_range = int(np.floor(1/fmax*fs))
             end_range = int(np.ceil(1/fmin*fs))
             search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+
+        if end_range > window_size:
+            raise Exception(f'fmin must be lager than {fs/window_size} Hz')
+        elif end_range > (window_size//2):
+            warnings.warn(f'fmin might be lager than {fs/(window_size//2)} Hz')
 
     if pp_mode == 'positive+negative':
         if implementation == 'Cython':
@@ -753,6 +766,10 @@ def calc_Pitch_with_bayes(data,
             start_range = int(np.floor(1/fmax*fs))
             end_range = int(np.ceil(1/fmin*fs))
             search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+    
+        if end_range > (window_size//2):
+            raise Exception(f'fmin must be lager than {fs/(window_size//2)} Hz')
+
 
     # 処理実行
     if pp_mode == 'positive+negative':
@@ -1095,6 +1112,9 @@ def calc_Pitch_with_viterbi(data,
             start_range = int(np.floor(1/fmax*fs))
             end_range = int(np.ceil(1/fmin*fs))
             search_sample = np.arange(start_range,end_range+1, dtype=np.intp)
+    
+        if end_range > (window_size//2):
+            raise Exception(f'fmin must be lager than {fs/(window_size//2)} Hz')
 
     # 処理実行
     if pp_mode == 'positive+negative':
