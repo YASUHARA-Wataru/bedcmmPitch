@@ -168,22 +168,27 @@ def calc_Pitch_core(data,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is parabolic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
+
                 peak_idx = peak_idx + ((bedcmm_smooth-1)/2)
                 peak_score = peak_value/mean_data
             else:
@@ -246,22 +251,27 @@ def calc_Pitch_negaposi_core(data_posi,data_nega,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
+
                 peak_idx = peak_idx + ((bedcmm_smooth-1)/2)
                 peak_score = peak_value/mean_data
             else:
@@ -593,22 +603,27 @@ def calc_Pitch_bayes_negaposi_core(data_posi,data_nega,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
+
                 peak_score = peak_value/mean_data
                 peak_posister = posterior[max_idx_int]
             else:
@@ -681,22 +696,27 @@ def calc_Pitch_bayes_core(data,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
+
                 peak_score = peak_value/mean_data
                 peak_posister = posterior[max_idx_int]
             else:
@@ -938,22 +958,26 @@ def calc_Pitch_viterbi_negaposi_core(data_posi,data_nega,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
                 peak_score = peak_value/mean_data_list[frame_num]
                 peak_likelihood= likelihood_list[frame_num][max_idx_int]
             else:
@@ -1026,22 +1050,27 @@ def calc_Pitch_viterbi_core(data,
             if max_idx_int != 0:
                 if interpolator_mode == 'parabolic':
                     delta,peak_value = _parabolic_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'gaussian':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _gaussian_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'centroid':
                     if pp_mode == 'threshold_diff':
                         bedcmm_result = bedcmm_result - min(bedcmm_result)
                     delta,peak_value = _centroid_peak(bedcmm_result,max_idx_int)
-                    peak_idx = search_sample[max_idx_int]+delta
                 elif interpolator_mode == 'no':
                     peak_value = bedcmm_result[max_idx_int]
-                    peak_idx = float(search_sample[max_idx_int])
+                    delta = 0
                 else:
                     raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+                if delta < -0.5:
+                    delta = -0.5
+                if delta > 0.5:
+                    delta = 0.5
+
+                peak_idx = search_sample[max_idx_int]+delta
+
                 peak_score = peak_value/mean_data_list[frame_num]
                 peak_likelihood= likelihood_list[frame_num][max_idx_int]
             else:

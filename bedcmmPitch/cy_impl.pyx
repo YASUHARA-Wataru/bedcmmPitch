@@ -329,6 +329,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_core_cy(double[:] data,
             else:
                 raise Exception('interpolator_mode is parabolic,centroid,gaussian or no')
 
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
+
             ip_x = <double> search_sample[max_idx_int] + delta_x + ((bedcmm_smooth-1)/2)
             score = peak_value/mean_data
         else:
@@ -421,6 +426,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_negaposi_core_cy(double[:] data_
                 delta_x = 0.0
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
 
             ip_x = <double> search_sample[max_idx_int] + delta_x + ((bedcmm_smooth-1)/2)
             score = peak_value/mean_data
@@ -644,6 +654,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_bayes_negaposi_core_cy(double[:]
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
 
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
+
             ip_x = <double> search_sample[max_idx_int] + delta_x
             score = peak_value/mean_data
             probability = posterior[max_idx_int]
@@ -728,6 +743,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_bayes_core_cy(double[:] data,
                 delta_x = 0.0
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
 
             ip_x = <double> search_sample[max_idx_int] + delta_x
             score = peak_value/mean_data
@@ -953,6 +973,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_viterbi_negaposi_core_cy(double[
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
 
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
+
             ip_x = <double> search_sample[max_idx_int] + delta_x
             score = peak_value/mean_data_list[frame_num]
             probability = likelihood_list[frame_num][max_idx_int]
@@ -1046,6 +1071,11 @@ cpdef cnp.ndarray[DTYPE_d_t, ndim=2] calc_Pitch_viterbi_core_cy(double[:] data,
                 delta_x = 0.0
             else:
                 raise Exception('interpolator_mode is quadratic,centroid,gaussian or no')
+
+            if delta_x < -0.5:
+                delta_x = -0.5
+            if delta_x > 0.5:
+                delta_x = 0.5
 
             ip_x = <double> search_sample[max_idx_int] + delta_x
             score = peak_value/mean_data_list[frame_num]
